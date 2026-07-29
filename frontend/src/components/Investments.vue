@@ -531,8 +531,8 @@ export default {
     const fetchData = async () => {
       try {
         const [portfolioRes, txsRes] = await Promise.all([
-          fetch('/api/investments/portfolio').then(r => r.json()),
-          fetch('/api/investments').then(r => r.json())
+          fetch(`/api/investments/portfolio?t=${Date.now()}`).then(r => r.json()),
+          fetch(`/api/investments?t=${Date.now()}`).then(r => r.json())
         ]);
         portfolioData.value = portfolioRes;
         transactions.value = txsRes;

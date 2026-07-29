@@ -349,7 +349,7 @@ export default {
     // Fetch master list of categories
     const fetchCategories = async () => {
       try {
-        const res = await fetch('/api/categories');
+        const res = await fetch(`/api/categories?t=${Date.now()}`);
         if (res.ok) {
           categories.value = await res.json();
         }
@@ -361,7 +361,7 @@ export default {
     // Fetch transactions based on month
     const fetchTransactions = async () => {
       try {
-        const res = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31`);
+        const res = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`);
         if (res.ok) {
           transactions.value = await res.json();
           filterTransactions();

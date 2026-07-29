@@ -176,12 +176,12 @@ export default {
     const fetchBudgetsAndExpenses = async () => {
       try {
         // 1. Fetch categories
-        const resCat = await fetch('/api/categories');
+        const resCat = await fetch(`/api/categories?t=${Date.now()}`);
         const categories = resCat.ok ? await resCat.json() : [];
         const expenseCategories = categories.filter(c => c.type === 'expense');
 
         // 2. Fetch budgets for the month
-        const resBudgets = await fetch(`/api/budgets?month=${props.month}`);
+        const resBudgets = await fetch(`/api/budgets?month=${props.month}&t=${Date.now()}`);
         const budgets = resBudgets.ok ? await resBudgets.json() : [];
         const budgetMap = {};
         budgets.forEach(b => {
@@ -189,7 +189,7 @@ export default {
         });
 
         // 3. Fetch expenses summary breakdown
-        const resSummary = await fetch(`/api/summary?month=${props.month}`);
+        const resSummary = await fetch(`/api/summary?month=${props.month}&t=${Date.now()}`);
         const summaryData = resSummary.ok ? await resSummary.json() : null;
         const spentMap = {};
         if (summaryData && summaryData.breakdown) {

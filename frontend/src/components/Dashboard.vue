@@ -675,20 +675,20 @@ export default {
     const fetchData = async () => {
       try {
         // 1. Fetch categories
-        const resCat = await fetch('/api/categories');
+        const resCat = await fetch(`/api/categories?t=${Date.now()}`);
         if (resCat.ok) {
           categories.value = await resCat.json();
         }
 
         // 2. Fetch monthly summary stats
-        const resSummary = await fetch(`/api/summary?month=${props.month}`);
+        const resSummary = await fetch(`/api/summary?month=${props.month}&t=${Date.now()}`);
         if (resSummary.ok) {
           summary.value = await resSummary.json();
           calculateBudgetProgress();
         }
 
         // 3. Fetch all monthly transactions to compute daily spend
-        const resTx = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31`);
+        const resTx = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`);
         if (resTx.ok) {
           allTransactions.value = await resTx.json();
           recentTransactions.value = allTransactions.value.slice(0, 5); // display only top 5 recent
