@@ -804,3 +804,161 @@ body.light-theme select option {
     margin-left: 80px;
   }
 }
+
+/* =============================================================
+   RESPONSIVE LAYOUT HELPERS (100% Mobile & Tablet Support)
+   ============================================================= */
+
+/* Dual column split grid (Dashboard & Investments) */
+.responsive-split-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .responsive-split-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Responsive columns borders in Apple summary header */
+.summary-col-border {
+  border-left: 1.5px solid var(--border-color);
+  padding-left: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .summary-col-border {
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1.5px solid var(--border-color);
+    padding-top: 1rem;
+  }
+}
+
+/* Mobile responsive navigation & layout overrides */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  /* Convert Sidebar to Bottom Navigation Bar */
+  .sidebar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100vw !important;
+    height: 64px !important;
+    flex-direction: row !important;
+    padding: 0 8px !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border-color) !important;
+    background-color: var(--bg-secondary) !important;
+    backdrop-filter: blur(20px) !important;
+    z-index: 1000 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  /* Hide unnecessary elements on mobile sidebar */
+  .brand, .theme-toggle-container, .sidebar-toggle-btn {
+    display: none !important;
+  }
+
+  /* Make nav links spread horizontally */
+  .nav-links {
+    flex-direction: row !important;
+    width: 100% !important;
+    justify-content: space-around !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .nav-item {
+    flex: 1 !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .nav-item button {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 6px 0 !important;
+    font-size: 0.725rem !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    background: none !important;
+    border: none !important;
+    text-align: center !important;
+  }
+
+  .nav-item button svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .nav-item.active button {
+    color: var(--color-primary) !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Adjust Main Content to not overlap with bottom nav bar */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 1.25rem !important;
+    padding-bottom: 90px !important; /* space for bottom nav */
+  }
+
+  header {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 1.5rem !important;
+    gap: 10px !important;
+  }
+
+  .page-title h1 {
+    font-size: 1.35rem !important;
+  }
+
+  .page-title p {
+    display: none !important; /* hide subtitle to save vertical space */
+  }
+
+  .month-picker {
+    padding: 6px 12px !important;
+  }
+
+  .month-picker select {
+    font-size: 0.9rem !important;
+  }
+
+  /* Tighten card paddings on mobile */
+  .glass-card {
+    padding: 1.25rem !important;
+  }
+
+  /* Make forms fit better */
+  form {
+    gap: 12px !important;
+  }
+
+  /* Fix tables overflow on small mobile screens */
+  .table-container {
+    margin-top: 0.5rem;
+    border-radius: 12px;
+  }
+}
+

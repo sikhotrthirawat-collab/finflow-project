@@ -42,7 +42,7 @@
     </div>
 
     <!-- Main Workspace Layout Grid: Left (Pockets) & Right (Daily Logger & Smart AI) -->
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem; align-items: start; flex-wrap: wrap;">
+    <div class="responsive-split-grid">
       
       <!-- LEFT SECTION: Cloud Pockets Grid -->
       <div>

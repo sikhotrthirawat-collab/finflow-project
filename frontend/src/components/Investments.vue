@@ -17,7 +17,7 @@
       </div>
 
       <!-- สินทรัพย์รวมหุ้น (Total Stocks) -->
-      <div style="display: flex; align-items: center; gap: 12px; border-left: 1.5px solid var(--border-color); padding-left: 1.25rem;">
+      <div class="summary-col-border" style="display: flex; align-items: center; gap: 12px;">
         <span style="font-size: 1.5rem;">📈</span>
         <div>
           <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">สินทรัพย์รวมหุ้น (Total Stocks)</div>
@@ -31,7 +31,7 @@
       </div>
 
       <!-- เงินสดคงเหลือ (Dime! Cash) -->
-      <div style="display: flex; align-items: center; gap: 12px; border-left: 1.5px solid var(--border-color); padding-left: 1.25rem;">
+      <div class="summary-col-border" style="display: flex; align-items: center; gap: 12px;">
         <span style="font-size: 1.5rem;">🇺🇸</span>
         <div>
           <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; color: #af52de;">เงินสดคงเหลือ (Dime! Cash)</div>
@@ -45,7 +45,7 @@
       </div>
 
       <!-- Exchange Rate Config -->
-      <div style="display: flex; align-items: center; gap: 8px; border-left: 1.5px solid var(--border-color); padding-left: 1.25rem; justify-content: flex-end;">
+      <div class="summary-col-border" style="display: flex; align-items: center; gap: 8px; justify-content: flex-end; width: 100%;">
         <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; white-space: nowrap;">อัตราแลกเปลี่ยน:</label>
         <div style="display: flex; align-items: center; background: rgba(0,0,0,0.02); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border-color);">
           <span style="font-size: 0.75rem; color: var(--text-muted); margin-right: 4px; white-space: nowrap;">1 USD =</span>
@@ -56,7 +56,7 @@
     </div>
 
     <!-- 2. Split Screen: Left (Holdings & Allocation Graph) & Right (Forms & History Ledger) -->
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem; align-items: start; flex-wrap: wrap;">
+    <div class="responsive-split-grid">
       
       <!-- LEFT SECTION: Simplified Purchased Stocks Table with Date & Graph -->
       <div style="display: flex; flex-direction: column; gap: 2rem;">
