@@ -320,7 +320,7 @@ app.get('/api/summary', async (req, res) => {
     );
 
     // Fetch categories to map colors
-    const [dbCategories] = await db.query('SELECT name, color FROM categories WHERE type = "expense"');
+    const [dbCategories] = await db.query("SELECT name, color FROM categories WHERE type = 'expense'");
     const colorMap = {};
     dbCategories.forEach(c => {
       colorMap[c.name] = c.color;
