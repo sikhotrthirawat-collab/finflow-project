@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: finance_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_123
+      MYSQL_DATABASE: finance_db
+      MYSQL_USER: finance_user
+      MYSQL_PASSWORD: finance_pass_123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - finance-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: finance_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - finance-network
+
+  backend:
+    build: ./backend
+    container_name: finance_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=finance_user
+      - DB_PASSWORD=finance_pass_123
+      - DB_DATABASE=finance_db
+      - DB_PORT=3306
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    networks:
+      - finance-network
+
+  frontend:
+    build: ./frontend
+    container_name: finance_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - finance-network
+
+volumes:
+  mysql_data:
+
+networks:
+  finance-network:
+    driver: bridge
