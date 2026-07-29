@@ -947,54 +947,18 @@ body.light-theme select option {
 
   /* Tighten card paddings on mobile */
   .glass-card {
-    padding: 1.15rem !important;
+    padding: 1.25rem !important;
   }
 
   /* Make forms fit better */
   form {
-    gap: 10px !important;
+    gap: 12px !important;
   }
 
   /* Fix tables overflow on small mobile screens */
   .table-container {
     margin-top: 0.5rem;
     border-radius: 12px;
-  }
-
-  /* Compact Modals for Mobile */
-  .modal-content {
-    padding: 1.25rem !important;
-    width: 92% !important;
-    max-width: 420px !important;
-    border-radius: 20px !important;
-  }
-
-  .modal-header {
-    margin-bottom: 1rem !important;
-  }
-
-  .modal-header h3 {
-    font-size: 1.15rem !important;
-  }
-
-  /* Compact form controls on mobile */
-  .form-group {
-    margin-bottom: 0.85rem !important;
-  }
-
-  .form-group label {
-    font-size: 0.8rem !important;
-    margin-bottom: 4px !important;
-  }
-
-  .form-control, select, textarea {
-    padding: 8px 12px !important;
-    font-size: 0.875rem !important;
-  }
-  
-  .btn {
-    padding: 8px 16px !important;
-    font-size: 0.85rem !important;
   }
 }
 
