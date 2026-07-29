@@ -48,7 +48,7 @@
     </div>
 
     <!-- Main Workspace Area: Left Table, Right Summary & Chart -->
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem; align-items: start; flex-wrap: wrap;" class="print-layout-grid">
+    <div class="responsive-split-grid print-layout-grid">
       
       <!-- LEFT Column: Transactions List Table -->
       <div class="glass-card transactions-table-card" style="padding: 1.25rem;">
