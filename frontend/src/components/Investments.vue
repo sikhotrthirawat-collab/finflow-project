@@ -71,7 +71,7 @@
           </h3>
           
           <div class="table-container" v-if="stockTransactions && stockTransactions.length > 0">
-            <table>
+            <table class="desktop-table">
               <thead>
                 <tr>
                   <th>วันที่เข้าซื้อ</th>
@@ -98,11 +98,45 @@
                   <td style="text-align: center;">
                     <button @click="deleteTransaction(t.id)" class="btn btn-sm btn-danger" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; font-weight: 700;">
                       🗑️ ลบ
-                  </button>
+                    </button>
                   </td>
                 </tr>
               </tbody>
             </table>
+
+            <!-- Mobile Stock Transaction Cards -->
+            <div class="mobile-transaction-list">
+              <div v-for="t in stockTransactions" :key="t.id" class="mobile-tx-card">
+                <div class="mobile-tx-left">
+                  <div style="font-size: 1.25rem; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255,255,255,0.03);">
+                    📈
+                  </div>
+                  <div class="mobile-tx-info">
+                    <div class="mobile-tx-category">{{ t.symbol }}</div>
+                    <div class="mobile-tx-desc" style="font-weight: 600; font-size: 0.725rem;">
+                      {{ formatShares(t.shares) }} หุ้น @ ${{formatHighPrecisionPrice(t.price)}}
+                    </div>
+                    <div class="mobile-tx-date">{{ formatDate(t.date) }}</div>
+                  </div>
+                </div>
+                <div class="mobile-tx-right">
+                  <div class="mobile-tx-amount" style="color: var(--text-primary);">
+                    ${{ formatNumber(t.shares * t.price) }}
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; margin-top: -2px;">
+                    ≈ ฿{{ formatNumber((t.shares * t.price) * exchangeRate) }}
+                  </div>
+                  <div class="mobile-tx-actions" style="margin-top: 4px;">
+                    <button @click="deleteTransaction(t.id)" style="background: none; border: none; color: var(--color-danger); cursor: pointer; padding: 2px;">
+                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div v-else style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">

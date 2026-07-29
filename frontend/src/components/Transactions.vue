@@ -53,7 +53,7 @@
       <!-- LEFT Column: Transactions List Table -->
       <div class="glass-card transactions-table-card" style="padding: 1.25rem;">
         <div class="table-container" v-if="filteredTransactions.length > 0">
-          <table>
+          <table class="desktop-table">
             <thead>
               <tr>
                 <th>วันที่</th>
@@ -100,6 +100,41 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Mobile Transaction Cards -->
+          <div class="mobile-transaction-list">
+            <div v-for="tx in filteredTransactions" :key="tx.id" class="mobile-tx-card">
+              <div class="mobile-tx-left">
+                <div style="font-size: 1.25rem; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255,255,255,0.03);">
+                  {{ tx.type === 'income' ? '📥' : '💸' }}
+                </div>
+                <div class="mobile-tx-info">
+                  <div class="mobile-tx-category">{{ tx.category }}</div>
+                  <div class="mobile-tx-desc">{{ tx.description || '-' }}</div>
+                  <div class="mobile-tx-date">{{ formatDate(tx.date) }}</div>
+                </div>
+              </div>
+              <div class="mobile-tx-right">
+                <div class="mobile-tx-amount" :style="{ color: tx.type === 'income' ? 'var(--color-success)' : 'var(--color-danger)' }">
+                  {{ tx.type === 'income' ? '+' : '-' }}฿{{ formatNumber(tx.amount) }}
+                </div>
+                <div class="mobile-tx-actions actions-col">
+                  <button @click="openEditModal(tx)" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 2px;">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path>
+                    </svg>
+                  </button>
+                  <button @click="deleteTransaction(tx.id)" style="background: none; border: none; color: var(--color-danger); cursor: pointer; padding: 2px;">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div v-else style="text-align: center; color: var(--text-muted); padding: 5rem 0;">
