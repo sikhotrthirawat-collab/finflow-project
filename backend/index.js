@@ -521,6 +521,12 @@ async function initTables() {
       // Safe to ignore
     }
     try {
+      await db.query('ALTER TABLE budgets DROP INDEX unique_month_category');
+      console.log("Index unique_month_category dropped from budgets.");
+    } catch (err) {
+      // Safe to ignore
+    }
+    try {
       await db.query('ALTER TABLE budgets ADD UNIQUE KEY user_category_month (user_id, category, month)');
       console.log("Index user_category_month added to budgets.");
     } catch (err) {
