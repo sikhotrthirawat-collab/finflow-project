@@ -129,9 +129,14 @@
             <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0; display: flex; align-items: center; gap: 6px;">
               <span>🍽️</span> เงินกินใช้รายวัน ( allowance )
             </h4>
-            <span style="font-size: 0.725rem; color: var(--color-success); font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 10px;">
-              เหลืออีก {{ daysRemainingInfo.remainingDays }} วัน
-            </span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button type="button" @click="openAllowanceAnalysisModal" class="btn btn-sm" style="padding: 2px 8px; font-size: 0.7rem; font-weight: 700; border-radius: 8px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.25); cursor: pointer; display: flex; align-items: center; gap: 3px; height: 22px;">
+                📊 วิเคราะห์
+              </button>
+              <span style="font-size: 0.725rem; color: var(--color-success); font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 10px; height: 22px; display: inline-flex; align-items: center;">
+                เหลืออีก {{ daysRemainingInfo.remainingDays }} วัน
+              </span>
+            </div>
           </div>
 
           <!-- Daily Recommended Stats -->
@@ -407,6 +412,82 @@
         </div>
       </div>
     </div>
+
+    <!-- Allowance Analysis Modal -->
+    <div class="modal-overlay" :class="{ active: isAllowanceAnalysisModalOpen }" @click.self="closeAllowanceAnalysisModal">
+      <div class="modal-content" style="max-width: 550px; border-radius: 24px;">
+        <div class="modal-header">
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>📊</span> วิเคราะห์เงินกินใช้รายวันอย่างละเอียด
+          </h3>
+          <button @click="closeAllowanceAnalysisModal" class="close-btn">&times;</button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          
+          <!-- Rating / Grade Header -->
+          <div style="padding: 1rem; border-radius: 16px; display: flex; align-items: center; gap: 12px;" :style="allowanceReport.gradeStyle">
+            <span style="font-size: 2.2rem;">{{ allowanceReport.gradeEmoji }}</span>
+            <div>
+              <div style="font-size: 0.75rem; font-weight: 600; opacity: 0.85;">ประเมินพฤติกรรมวันนี้</div>
+              <div style="font-size: 1.45rem; font-weight: 850;">อยู่ในเกณฑ์: {{ allowanceReport.gradeText }}</div>
+            </div>
+          </div>
+
+          <!-- Comparison Stats Cards -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.725rem; color: var(--text-secondary); margin-bottom: 2px;">งบวันนี้ที่ควรใช้</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">฿{{ formatNumber(dailyAllowanceTarget) }}</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <div style="font-size: 0.725rem; color: var(--text-secondary); margin-bottom: 2px;">ใช้ไปแล้ววันนี้</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">฿{{ formatNumber(spentToday) }}</div>
+            </div>
+          </div>
+
+          <!-- Analysis text blocks -->
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; line-height: 1.5;">
+            
+            <!-- Strengths / Advantages -->
+            <div style="background: rgba(52, 199, 89, 0.05); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(52, 199, 89, 0.15);">
+              <div style="font-weight: 700; color: var(--color-success); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                <span>✅</span> ข้อดี / จุดแข็งของการกินใช้ตอนนี้:
+              </div>
+              <p style="color: var(--text-secondary);">
+                {{ allowanceReport.advantages }}
+              </p>
+            </div>
+
+            <!-- Weaknesses / Drawbacks -->
+            <div style="background: rgba(255, 59, 48, 0.05); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255, 59, 48, 0.15);">
+              <div style="font-weight: 700; color: var(--color-danger); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                <span>⚠️</span> ข้อเสีย / ข้อควรระวัง:
+              </div>
+              <p style="color: var(--text-secondary);">
+                {{ allowanceReport.drawbacks }}
+              </p>
+            </div>
+
+            <!-- Recommendations -->
+            <div style="background: rgba(0, 122, 255, 0.05); padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(0, 122, 255, 0.15);">
+              <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                <span>💡</span> คำแนะนำในการปรับปรุงตัว:
+              </div>
+              <p style="color: var(--text-secondary);">
+                {{ allowanceReport.recommendations }}
+              </p>
+            </div>
+
+          </div>
+
+          <button @click="closeAllowanceAnalysisModal" class="btn btn-secondary" style="width: 100%; border-radius: 12px; font-weight: 700; margin-top: 5px;">
+            เข้าใจแล้ว & ปิดหน้าต่าง
+          </button>
+
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -442,6 +523,7 @@ export default {
     const isHistoryModalOpen = ref(false);
     const selectedEnvelope = ref(null);
     const selectedEnvelopeForHistory = ref(null);
+    const isAllowanceAnalysisModalOpen = ref(false);
 
     // Form inputs
     const incomeForm = ref({
@@ -669,6 +751,82 @@ export default {
     const remainingTodayAllowance = computed(() => {
       const remaining = dailyAllowanceTarget.value - spentToday.value;
       return remaining > 0 ? remaining : 0;
+    });
+
+    const openAllowanceAnalysisModal = () => {
+      isAllowanceAnalysisModalOpen.value = true;
+    };
+
+    const closeAllowanceAnalysisModal = () => {
+      isAllowanceAnalysisModalOpen.value = false;
+    };
+
+    const allowanceReport = computed(() => {
+      const target = dailyAllowanceTarget.value;
+      const spent = spentToday.value;
+      const pocketRemaining = freeSpendPocket.value?.remaining || 0;
+      
+      let gradeText = 'ดีเยี่ยม';
+      let gradeEmoji = '🟢';
+      let gradeStyle = {
+        background: 'rgba(52, 199, 89, 0.12)',
+        color: '#34c759',
+        border: '1.5px solid rgba(52, 199, 89, 0.25)'
+      };
+      
+      let advantages = 'คุณควบคุมการกินใช้รายวันได้ยอดเยี่ยมมาก วันนี้ใช้จ่ายไปไม่เกินเกณฑ์เฉลี่ยที่แนะนำ ทำให้เงินในซองเหลือใช้ยังเพิ่มพูนและคงสภาพคล่องได้เป็นอย่างดี!';
+      let drawbacks = 'ไม่มีข้อเสียที่ร้ายแรงในวันนี้ แต่ให้ระวังสิ่งล่อตาล่อใจในอนาคตที่อาจทำให้พฤติกรรมนี้เปลี่ยนแปลงไป';
+      let recommendations = 'รักษาพฤติกรรมความมีวินัยแบบนี้ต่อไปเรื่อย ๆ หากทำได้จนจบเดือน คุณจะมีเงินเหลือสะสมเป็นเงินเก็บก้อนใหญ่ในซองเหลือใช้นี้แน่นอนครับ!';
+
+      if (spent === 0) {
+        gradeText = 'ยอดเยี่ยม (ไม่มีการใช้จ่าย)';
+        gradeEmoji = '💎';
+        gradeStyle = {
+          background: 'rgba(0, 122, 255, 0.12)',
+          color: '#007aff',
+          border: '1.5px solid rgba(0, 122, 255, 0.25)'
+        };
+        advantages = 'วันนี้คุณยังไม่ได้ใช้จ่ายเงินจากซองกินใช้รายวันเลย! เป็นพฤติกรรมการอดออมที่ยอดเยี่ยมมาก เหมาะสำหรับการรีเซ็ตสภาพคล่องหรือเร่งสร้างเงินออมสะสมครับ';
+        drawbacks = 'ไม่มีข้อเสีย แต่อย่าอดอาหารหรือประหยัดจนส่งผลต่อสุขภาพร่างกายนะครับ!';
+        recommendations = `หากมีความจำเป็นในการกินใช้ ให้กินใช้อยู่ในงบแนะนำ ฿${formatNumber(target)} ต่อวัน แต่หากสามารถออมได้แบบวันนี้เรื่อย ๆ เงินคงเหลือสะสมของคุณจะเติบโตอย่างรวดเร็วมากครับ`;
+      } else if (spent > target) {
+        const ratio = target > 0 ? (spent / target).toFixed(1) : spent;
+        gradeText = 'เริ่มตึงตัว (ใช้เงินเกินงบแนะนำ)';
+        gradeEmoji = '⚠️';
+        gradeStyle = {
+          background: 'rgba(255, 149, 0, 0.12)',
+          color: '#ff9500',
+          border: '1.5px solid rgba(255, 149, 0, 0.25)'
+        };
+        
+        advantages = 'ข้อดีคือคุณยังมีการดึงเงินจากซองสะสมที่มีความจุรองรับอยู่ ซึ่งไม่ได้ทำให้งบรวมทั้งหมดติดลบในทันทีเนื่องจากยังมีเงินสะสมรองรับระบบ';
+        drawbacks = `วันนี้คุณกินใช้ไป ฿${formatNumber(spent)} ซึ่งคิดเป็น ${ratio} เท่าของงบที่แนะนำต่อวัน (฿${formatNumber(target)}) หากทำเช่นนี้ติดต่อกัน เงินสะสมในซอง "เหลือใช้" (฿${formatNumber(pocketRemaining)}) จะหมดลงเร็วกว่าปกติอย่างเห็นได้ชัดในอนาคตอันใกล้!`;
+        
+        const nextThreeDaysTarget = (pocketRemaining / Math.max(1, daysRemainingInfo.value.remainingDays)) * 0.9;
+        recommendations = `เพื่อปรับสมดุลพอร์ตการกินใช้ แนะนำให้จำกัดงบการกินใช้ในอีก 2-3 วันข้างหน้าให้อยู่ที่ประมาณวันละ ฿${formatNumber(nextThreeDaysTarget)} หรือหลีกเลี่ยงการซื้อของฟุ่มเฟือยชั่วคราว เพื่อดึงงบกลับเข้าสู่แผนเดิมครับ`;
+
+        if (pocketRemaining <= 0) {
+          gradeText = 'อันตราย (ซองเหลือใช้หมดแล้ว)';
+          gradeEmoji = '🚨';
+          gradeStyle = {
+            background: 'rgba(255, 59, 48, 0.12)',
+            color: '#ff3b30',
+            border: '1.5px solid rgba(255, 59, 48, 0.25)'
+          };
+          advantages = 'คุณได้รู้ตัวเร็วว่าขณะนี้กระเป๋าเงินกินใช้รายวันได้หมดโควตาลงแล้ว ทำให้สามารถควบคุมเบรกการจ่ายเงินในส่วนอื่น ๆ ได้ทันที';
+          drawbacks = `กระเป๋าเงิน "เหลือใช้" ของคุณตอนนี้ติดลบหรือมีค่าเป็น 0 แล้ว! ทำให้วันนี้และวันต่อ ๆ ไปจะไม่มีงบสำหรับกินใช้รายวันแนะนำอีกต่อไป และการกินใช้ใด ๆ หลังจากนี้จะไปดึงทรัพยากรหลักหรือเบียดบังกระเป๋าออมเงินด้านอื่นทันที`;
+          recommendations = 'แนะนำให้รีบทำการ "โอนเงินเข้า (📥)" จาก Pockets อื่นที่ยังเหลือใช้ หรือนำเงินนอก Pocket เติมเข้ามาในซอง "เหลือใช้" จำนวนหนึ่งเพื่อคืนสภาพคล่อง และกำหนดงบเฉลี่ยรายวันต่อวันใหม่อีกครั้งอย่างมีวินัยครับ';
+        }
+      }
+
+      return {
+        gradeText,
+        gradeEmoji,
+        gradeStyle,
+        advantages,
+        drawbacks,
+        recommendations
+      };
     });
 
     // Main fetch functions
@@ -1004,6 +1162,10 @@ export default {
       isHistoryModalOpen,
       selectedEnvelopeForHistory,
       pocketHistoryList,
+      isAllowanceAnalysisModalOpen,
+      allowanceReport,
+      openAllowanceAnalysisModal,
+      closeAllowanceAnalysisModal,
       openQuickIncomeModal,
       openQuickDeductModal,
       openAdjustBudgetModal,
