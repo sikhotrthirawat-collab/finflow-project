@@ -193,14 +193,14 @@ export default {
 .logo-outer {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem auto;
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
   transition: transform 0.3s ease;
 }
 
@@ -210,7 +210,7 @@ export default {
 
 .logo-icon {
   font-size: 2.25rem;
-  filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.4));
+  filter: drop-shadow(0 4px 10px rgba(16, 185, 129, 0.4));
 }
 
 .brand-title {
@@ -219,7 +219,7 @@ export default {
   font-weight: 800;
   letter-spacing: -0.5px;
   margin: 0 0 6px 0;
-  background: linear-gradient(135deg, #ffffff 10%, #93c5fd 60%, #c084fc 100%);
+  background: linear-gradient(135deg, #ffffff 10%, #10b981 60%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
@@ -308,14 +308,14 @@ export default {
 }
 
 .input-container input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
   background: rgba(0, 0, 0, 0.35);
 }
 
 :global(body.light-theme) .input-container input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
   background: #ffffff;
 }
 
@@ -345,7 +345,7 @@ export default {
 .submit-btn {
   width: 100%;
   height: 50px;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #7c3aed 100%);
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
   border: none;
   border-radius: 14px;
   color: #ffffff;
@@ -355,14 +355,14 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
   margin-top: 5px;
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.55);
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #8b5cf6 100%);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #34d399 0%, #60a5fa 100%);
 }
 
 .submit-btn:active:not(:disabled) {
@@ -462,7 +462,7 @@ export default {
 .blob-1 {
   width: 320px;
   height: 320px;
-  background: rgba(37, 99, 235, 0.2);
+  background: rgba(16, 185, 129, 0.15);
   top: 10%;
   left: 15%;
 }
@@ -470,7 +470,7 @@ export default {
 .blob-2 {
   width: 380px;
   height: 380px;
-  background: rgba(124, 58, 237, 0.18);
+  background: rgba(59, 130, 246, 0.18);
   bottom: 10%;
   right: 15%;
   animation-delay: -5s;
