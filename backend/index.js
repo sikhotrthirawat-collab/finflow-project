@@ -97,23 +97,16 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/user/profile', async (req, res) => {
   try {
     const userId = getUserId(req);
-    const [rows] = await db.query('SELECT id, username, allowance_target_date FROM users WHERE id = ?', [userId]);
+    const [rows] = await db.query("SELECT id, username, DATE_FORMAT(allowance_target_date, '%Y-%m-%d') AS allowance_target_date FROM users WHERE id = ?", [userId]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    // Format date to YYYY-MM-DD
-    let targetDate = null;
-    if (rows[0].allowance_target_date) {
-      const d = new Date(rows[0].allowance_target_date);
-      // Make sure it doesn't offset due to timezone
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      targetDate = `${year}-${month}-${day}`;
-    }
-    
-    res.json({ id: rows[0].id, username: rows[0].username, allowance_target_date: targetDate });
+    res.json({ 
+      id: rows[0].id, 
+      username: rows[0].username, 
+      allowance_target_date: rows[0].allowance_target_date || null 
+    });
   } catch (err) {
     handleError(res, err);
   }
