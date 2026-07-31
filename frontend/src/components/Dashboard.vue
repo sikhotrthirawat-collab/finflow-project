@@ -139,6 +139,25 @@
             </div>
           </div>
 
+          <!-- Target End Date Setting -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 8px 12px; background: rgba(59, 130, 246, 0.04); border-radius: 12px; border: 1px solid var(--border-color); font-size: 0.75rem;">
+            <span style="color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 4px;">
+              <span>📅</span> เฉลี่ยถึงวันที่:
+            </span>
+            <div style="position: relative; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+              <span style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">
+                {{ formatDate(daysRemainingInfo.targetDateStr) }}
+              </span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">✏️</span>
+              <input 
+                type="date" 
+                :value="daysRemainingInfo.targetDateStr"
+                @change="updateAllowanceTargetDate" 
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
+              />
+            </div>
+          </div>
+
           <!-- Daily Recommended Stats -->
           <div style="background: rgba(0,0,0,0.03); padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border-color);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -550,6 +569,46 @@ export default {
     const budgetProgressList = ref([]);
     const categories = ref([]);
 
+    const userProfile = ref({ allowance_target_date: null });
+
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch(`/api/user/profile?t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
+        if (res.ok) {
+          userProfile.value = await res.json();
+        }
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+      }
+    };
+
+    const updateAllowanceTargetDate = async (e) => {
+      const newDate = e.target.value;
+      if (!newDate) return;
+      
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
+          body: JSON.stringify({
+            allowance_target_date: newDate
+          })
+        });
+        
+        if (res.ok) {
+          userProfile.value.allowance_target_date = newDate;
+          fetchData();
+        }
+      } catch (err) {
+        console.error('Error updating allowance target date:', err);
+      }
+    };
+
     // Modal Controls
     const isIncomeModalOpen = ref(false);
     const isExpenseModalOpen = ref(false);
@@ -724,9 +783,27 @@ export default {
       return `${yearCE}-${month}-${day}`;
     };
 
-    // Days remaining calculations (Until the end of the next month, as requested by the user!)
+    // Days remaining calculations (Until the user's custom date or end of the next month)
     const daysRemainingInfo = computed(() => {
       const today = new Date();
+      const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const oneDayMs = 24 * 60 * 60 * 1000;
+
+      // Determine the target date
+      let targetDateObj;
+      if (userProfile.value && userProfile.value.allowance_target_date) {
+        targetDateObj = new Date(userProfile.value.allowance_target_date);
+        // Reset targetDateObj to midnight local time to avoid timezone offsets
+        targetDateObj = new Date(targetDateObj.getFullYear(), targetDateObj.getMonth(), targetDateObj.getDate());
+      } else {
+        // Fallback to default: end of next month
+        targetDateObj = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      }
+
+      const diffMs = targetDateObj.getTime() - todayMidnight.getTime();
+      // Ensure remainingDays is at least 1 to avoid division by zero or negative days
+      const remainingDays = Math.max(1, Math.round(diffMs / oneDayMs) + 1);
+      
       const year = today.getFullYear();
       const month = today.getMonth() + 1;
       const currentMonthStr = `${year}-${String(month).padStart(2, '0')}`;
@@ -737,22 +814,16 @@ export default {
         return {
           totalDays: totalDaysInSelected,
           remainingDays: totalDaysInSelected,
-          isCurrentMonth: false
+          isCurrentMonth: false,
+          targetDateStr: targetDateObj.toISOString().split('T')[0]
         };
       }
 
-      // Calculate days from today to the end of next month
-      const currentMonthIndex = today.getMonth(); // 0-indexed (e.g. July is 6)
-      const endOfNextMonth = new Date(year, currentMonthIndex + 2, 0); // Last day of next month (e.g. August 31)
-      const oneDayMs = 24 * 60 * 60 * 1000;
-      const todayMidnight = new Date(year, today.getMonth(), today.getDate());
-      const diffMs = endOfNextMonth.getTime() - todayMidnight.getTime();
-      const remainingDays = Math.round(diffMs / oneDayMs) + 1;
-
       return {
         totalDays: new Date(year, month, 0).getDate(),
-        remainingDays: remainingDays, // July 28 to Aug 31 = 35 days
-        isCurrentMonth: true
+        remainingDays: remainingDays,
+        isCurrentMonth: true,
+        targetDateStr: targetDateObj.toISOString().split('T')[0]
       };
     });
 
@@ -868,6 +939,8 @@ export default {
     // Main fetch functions
     const fetchData = async () => {
       try {
+        await fetchUserProfile();
+
         // 1. Fetch categories
         const resCat = await fetch(`/api/categories?t=${Date.now()}`, {
           headers: { 'x-user-id': String(getUserId()) }
@@ -1106,7 +1179,7 @@ export default {
 
       insights.push({
         type: 'info',
-        message: `📅 เหลือเวลาใช้เงินอีก ${daysRemainingInfo.value.remainingDays} วัน (เฉลี่ยถึงสิ้นเดือนหน้า วันที่ ${formatDate(endOfNextMonthStr)})`
+        message: `📅 เหลือเวลาใช้เงินอีก ${daysRemainingInfo.value.remainingDays} วัน (เฉลี่ยถึงวันที่ ${formatDate(daysRemainingInfo.value.targetDateStr)})`
       });
 
       // 2. Savings percentage
@@ -1238,7 +1311,9 @@ export default {
       getPocketCardStyle,
       getInsightBgColor,
       getInsightTextColor,
-      getInsightIcon
+      getInsightIcon,
+      userProfile,
+      updateAllowanceTargetDate
     };
   }
 };

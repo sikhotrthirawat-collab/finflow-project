@@ -91,6 +91,49 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // -------------------------------------------------------------
+// USER PROFILE ENDPOINTS
+// -------------------------------------------------------------
+// Get user profile details
+app.get('/api/user/profile', async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const [rows] = await db.query('SELECT id, username, allowance_target_date FROM users WHERE id = ?', [userId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Format date to YYYY-MM-DD
+    let targetDate = null;
+    if (rows[0].allowance_target_date) {
+      const d = new Date(rows[0].allowance_target_date);
+      // Make sure it doesn't offset due to timezone
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      targetDate = `${year}-${month}-${day}`;
+    }
+    
+    res.json({ id: rows[0].id, username: rows[0].username, allowance_target_date: targetDate });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// Update user profile details (allowance target date)
+app.post('/api/user/profile', async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const { allowance_target_date } = req.body; // Expects YYYY-MM-DD
+    
+    await db.query('UPDATE users SET allowance_target_date = ? WHERE id = ?', [allowance_target_date || null, userId]);
+    
+    res.json({ message: 'Profile updated successfully', allowance_target_date });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// -------------------------------------------------------------
 // CATEGORIES ENDPOINTS
 // -------------------------------------------------------------
 app.get('/api/categories', async (req, res) => {
@@ -457,6 +500,13 @@ async function initTables() {
       (1, 'oat', '123'),
       (2, 'beem', '123')
     `);
+
+    try {
+      await db.query(`ALTER TABLE users ADD COLUMN allowance_target_date DATE DEFAULT NULL`);
+      console.log("Column allowance_target_date added to users.");
+    } catch (err) {
+      // ignore
+    }
 
     // 3. Create investments and stock prices tables
     await db.query(`
