@@ -501,6 +501,12 @@ async function initTables() {
       // Safe to ignore if index does not exist (Error 1091 / Can't drop key)
     }
     try {
+      await db.query('ALTER TABLE categories DROP INDEX name');
+      console.log("Index name dropped from categories.");
+    } catch (err) {
+      // Safe to ignore
+    }
+    try {
       await db.query('ALTER TABLE categories ADD UNIQUE KEY user_name_type (user_id, name, type)');
       console.log("Index user_name_type added to categories.");
     } catch (err) {
