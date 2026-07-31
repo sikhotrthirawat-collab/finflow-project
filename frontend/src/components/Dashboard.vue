@@ -792,9 +792,18 @@ export default {
       // Determine the target date
       let targetDateObj;
       if (userProfile.value && userProfile.value.allowance_target_date) {
-        targetDateObj = new Date(userProfile.value.allowance_target_date);
-        // Reset targetDateObj to midnight local time to avoid timezone offsets
-        targetDateObj = new Date(targetDateObj.getFullYear(), targetDateObj.getMonth(), targetDateObj.getDate());
+        try {
+          const parts = userProfile.value.allowance_target_date.split('-');
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          targetDateObj = new Date(y, m, d);
+          if (isNaN(targetDateObj.getTime())) {
+            throw new Error('Invalid Date');
+          }
+        } catch (e) {
+          targetDateObj = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+        }
       } else {
         // Fallback to default: end of next month
         targetDateObj = new Date(today.getFullYear(), today.getMonth() + 2, 0);
@@ -804,6 +813,11 @@ export default {
       // Ensure remainingDays is at least 1 to avoid division by zero or negative days
       const remainingDays = Math.max(1, Math.round(diffMs / oneDayMs) + 1);
       
+      const yearStr = targetDateObj.getFullYear();
+      const monthStr = String(targetDateObj.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(targetDateObj.getDate()).padStart(2, '0');
+      const targetDateStr = `${yearStr}-${monthStr}-${dayStr}`;
+
       const year = today.getFullYear();
       const month = today.getMonth() + 1;
       const currentMonthStr = `${year}-${String(month).padStart(2, '0')}`;
@@ -815,7 +829,7 @@ export default {
           totalDays: totalDaysInSelected,
           remainingDays: totalDaysInSelected,
           isCurrentMonth: false,
-          targetDateStr: targetDateObj.toISOString().split('T')[0]
+          targetDateStr
         };
       }
 
@@ -823,7 +837,7 @@ export default {
         totalDays: new Date(year, month, 0).getDate(),
         remainingDays: remainingDays,
         isCurrentMonth: true,
-        targetDateStr: targetDateObj.toISOString().split('T')[0]
+        targetDateStr
       };
     });
 
