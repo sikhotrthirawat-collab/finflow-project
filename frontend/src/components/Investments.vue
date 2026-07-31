@@ -321,6 +321,11 @@ export default {
     }
   },
   setup(props) {
+    const getUserId = () => {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored).id : 1;
+    };
+
     const portfolioData = ref({
       holdings: [],
       totalInvestedCapital: 0,
@@ -531,8 +536,12 @@ export default {
     const fetchData = async () => {
       try {
         const [portfolioRes, txsRes] = await Promise.all([
-          fetch(`/api/investments/portfolio?t=${Date.now()}`).then(r => r.json()),
-          fetch(`/api/investments?t=${Date.now()}`).then(r => r.json())
+          fetch(`/api/investments/portfolio?t=${Date.now()}`, {
+            headers: { 'x-user-id': String(getUserId()) }
+          }).then(r => r.json()),
+          fetch(`/api/investments?t=${Date.now()}`, {
+            headers: { 'x-user-id': String(getUserId()) }
+          }).then(r => r.json())
         ]);
         portfolioData.value = portfolioRes;
         transactions.value = txsRes;
@@ -571,7 +580,10 @@ export default {
 
         const res = await fetch('/api/investments', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify(data)
         });
 
@@ -617,7 +629,10 @@ export default {
 
         const res = await fetch('/api/investments', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify(data)
         });
 
@@ -637,7 +652,8 @@ export default {
       if (!confirm('คุณแน่ใจหรือไม่ที่จะลบรายการธุรกรรมนี้?')) return;
       try {
         const res = await fetch(`/api/investments/${id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { 'x-user-id': String(getUserId()) }
         });
         if (res.ok) {
           fetchData();

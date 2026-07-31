@@ -151,6 +151,11 @@ export default {
     }
   },
   setup(props, { emit }) {
+    const getUserId = () => {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored).id : 1;
+    };
+
     const budgetItems = ref([]);
     const isSaving = ref(false);
 
@@ -176,20 +181,26 @@ export default {
     const fetchBudgetsAndExpenses = async () => {
       try {
         // 1. Fetch categories
-        const resCat = await fetch(`/api/categories?t=${Date.now()}`);
+        const resCat = await fetch(`/api/categories?t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         const categories = resCat.ok ? await resCat.json() : [];
         const expenseCategories = categories.filter(c => c.type === 'expense');
-
+ 
         // 2. Fetch budgets for the month
-        const resBudgets = await fetch(`/api/budgets?month=${props.month}&t=${Date.now()}`);
+        const resBudgets = await fetch(`/api/budgets?month=${props.month}&t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         const budgets = resBudgets.ok ? await resBudgets.json() : [];
         const budgetMap = {};
         budgets.forEach(b => {
           budgetMap[b.category] = parseFloat(b.amount);
         });
-
+ 
         // 3. Fetch expenses summary breakdown
-        const resSummary = await fetch(`/api/summary?month=${props.month}&t=${Date.now()}`);
+        const resSummary = await fetch(`/api/summary?month=${props.month}&t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         const summaryData = resSummary.ok ? await resSummary.json() : null;
         const spentMap = {};
         if (summaryData && summaryData.breakdown) {
@@ -225,7 +236,10 @@ export default {
           const amt = item.amount && item.amount > 0 ? item.amount : 0;
           return fetch('/api/budgets', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'x-user-id': String(getUserId())
+            },
             body: JSON.stringify({
               category: item.category,
               amount: amt,
@@ -251,7 +265,8 @@ export default {
       if (!confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่ "${name}"?`)) return;
       try {
         const res = await fetch(`/api/categories/${id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { 'x-user-id': String(getUserId()) }
         });
         if (res.ok) {
           alert(`ลบหมวดหมู่ "${name}" เรียบร้อยแล้ว!`);
@@ -284,7 +299,10 @@ export default {
       try {
         const res = await fetch(`/api/categories/${item.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify({
             name: item.editName.trim(),
             color: item.editColor
@@ -312,7 +330,10 @@ export default {
       try {
         const res = await fetch('/api/categories', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify({
             name: newCategoryName.value.trim(),
             type: 'expense',

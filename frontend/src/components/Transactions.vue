@@ -256,6 +256,11 @@ export default {
     }
   },
   setup(props, { emit }) {
+    const getUserId = () => {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored).id : 1;
+    };
+
     const transactions = ref([]);
     const filteredTransactions = ref([]);
     const categories = ref([]);
@@ -349,7 +354,9 @@ export default {
     // Fetch master list of categories
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`/api/categories?t=${Date.now()}`);
+        const res = await fetch(`/api/categories?t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         if (res.ok) {
           categories.value = await res.json();
         }
@@ -361,7 +368,9 @@ export default {
     // Fetch transactions based on month
     const fetchTransactions = async () => {
       try {
-        const res = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`);
+        const res = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         if (res.ok) {
           transactions.value = await res.json();
           filterTransactions();
@@ -499,7 +508,10 @@ export default {
 
         const res = await fetch(url, {
           method,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify(payload)
         });
 
@@ -518,7 +530,8 @@ export default {
       if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) return;
       try {
         const res = await fetch(`/api/transactions/${id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { 'x-user-id': String(getUserId()) }
         });
         if (res.ok) {
           fetchTransactions();

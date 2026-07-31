@@ -532,6 +532,11 @@ export default {
     }
   },
   setup(props, { emit }) {
+    const getUserId = () => {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored).id : 1;
+    };
+
     const summary = ref({
       totalIncome: 0,
       totalExpense: 0,
@@ -864,20 +869,26 @@ export default {
     const fetchData = async () => {
       try {
         // 1. Fetch categories
-        const resCat = await fetch(`/api/categories?t=${Date.now()}`);
+        const resCat = await fetch(`/api/categories?t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         if (resCat.ok) {
           categories.value = await resCat.json();
         }
 
         // 2. Fetch monthly summary stats
-        const resSummary = await fetch(`/api/summary?month=${props.month}&t=${Date.now()}`);
+        const resSummary = await fetch(`/api/summary?month=${props.month}&t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         if (resSummary.ok) {
           summary.value = await resSummary.json();
           calculateBudgetProgress();
         }
 
         // 3. Fetch all monthly transactions to compute daily spend
-        const resTx = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`);
+        const resTx = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`, {
+          headers: { 'x-user-id': String(getUserId()) }
+        });
         if (resTx.ok) {
           allTransactions.value = await resTx.json();
           recentTransactions.value = allTransactions.value.slice(0, 5); // display only top 5 recent
@@ -978,7 +989,10 @@ export default {
       try {
         const res = await fetch('/api/transactions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify({
             ...incomeForm.value,
             date: parseDateText(incomeForm.value.dateText),
@@ -1000,7 +1014,10 @@ export default {
       try {
         const res = await fetch('/api/transactions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify({
             ...expenseForm.value,
             date: parseDateText(expenseForm.value.dateText),
@@ -1023,7 +1040,10 @@ export default {
       try {
         const res = await fetch('/api/budgets', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify({
             category: selectedEnvelope.value.category,
             amount: adjustBudgetAmount.value || 0,
@@ -1047,7 +1067,10 @@ export default {
       try {
         const res = await fetch('/api/transactions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
           body: JSON.stringify({
             date: parseDateText(dailyForm.value.date),
             type: 'expense',

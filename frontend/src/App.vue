@@ -1,5 +1,9 @@
 <template>
-  <div class="app-container">
+  <div v-if="!currentUser">
+    <Login @login-success="handleLoginSuccess" />
+  </div>
+  
+  <div v-else class="app-container">
     <!-- Sidebar Navigation -->
     <aside class="sidebar" :class="{ collapsed: isSidebarCollapsed }">
       <!-- Floating collapse button centered vertically on the right border -->
@@ -77,20 +81,37 @@
 
     <!-- Main Content Area -->
     <main class="main-content" :class="{ collapsed: isSidebarCollapsed }">
-      <header>
+      <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div class="page-title">
           <h1>{{ tabTitle }}</h1>
           <p>{{ tabSubtitle }}</p>
         </div>
         
-        <!-- Global Month Selector -->
-        <div class="month-picker">
-          <label style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 8px;">ประจำเดือน:</label>
-          <select v-model="selectedMonth">
-            <option v-for="m in monthOptions" :key="m.value" :value="m.value">
-              {{ m.label }}
-            </option>
-          </select>
+        <!-- Global Month Selector & User Controls -->
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div class="month-picker" style="margin: 0;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 8px;">ประจำเดือน:</label>
+            <select v-model="selectedMonth">
+              <option v-for="m in monthOptions" :key="m.value" :value="m.value">
+                {{ m.label }}
+              </option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px; padding-left: 12px; border-left: 1px solid var(--border-color);">
+            <div class="user-info-text" style="text-align: right;">
+              <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600;">ผู้ใช้งาน</div>
+              <div style="font-size: 0.85rem; font-weight: 800; text-transform: capitalize; color: var(--color-primary);">{{ currentUser.username }}</div>
+            </div>
+            <button 
+              @click="handleLogout" 
+              class="btn btn-secondary" 
+              style="padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; color: var(--color-danger); border-color: rgba(255, 59, 48, 0.2); background: rgba(255, 59, 48, 0.05);"
+              title="ออกจากระบบ"
+            >
+              ออก 🚪
+            </button>
+          </div>
         </div>
       </header>
 
@@ -111,6 +132,7 @@ import Dashboard from './components/Dashboard.vue';
 import Transactions from './components/Transactions.vue';
 import Budgets from './components/Budgets.vue';
 import Investments from './components/Investments.vue';
+import Login from './components/Login.vue';
 
 export default {
   name: 'App',
@@ -118,9 +140,31 @@ export default {
     Dashboard,
     Transactions,
     Budgets,
-    Investments
+    Investments,
+    Login
   },
   setup() {
+    // Authentication Session Management
+    const currentUser = ref(null);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        currentUser.value = JSON.parse(storedUser);
+      } catch (e) {
+        localStorage.removeItem('user');
+      }
+    }
+
+    const handleLoginSuccess = (user) => {
+      currentUser.value = user;
+      localStorage.setItem('user', JSON.stringify(user));
+    };
+
+    const handleLogout = () => {
+      currentUser.value = null;
+      localStorage.removeItem('user');
+    };
+
     const currentTab = ref('dashboard');
     const today = new Date();
     const defaultMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
@@ -202,6 +246,9 @@ export default {
     };
 
     return {
+      currentUser,
+      handleLoginSuccess,
+      handleLogout,
       currentTab,
       selectedMonth,
       monthOptions,
