@@ -446,6 +446,34 @@
             </div>
           </div>
 
+          <!-- Visual Budget Gauge (Health Bar style) -->
+          <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;">
+              <span>📊 สัดส่วนการใช้จ่ายวันนี้ (Daily Budget Gauge)</span>
+              <span :style="{ color: spentToday <= dailyAllowanceTarget ? 'var(--color-success)' : 'var(--color-danger)' }">
+                {{ allowanceReport.percentUsed }}%
+              </span>
+            </div>
+            <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; position: relative;">
+              <div 
+                :style="{ 
+                  width: Math.min(allowanceReport.percentUsed, 100) + '%', 
+                  backgroundColor: spentToday <= dailyAllowanceTarget ? 'var(--color-success)' : 'var(--color-danger)',
+                  height: '100%',
+                  borderRadius: '5px',
+                  boxShadow: spentToday <= dailyAllowanceTarget ? 'none' : '0 0 10px rgba(255, 59, 48, 0.4)',
+                  transition: 'width 0.5s ease'
+                }"
+              ></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">
+              <span>฿0.00</span>
+              <span v-if="spentToday > dailyAllowanceTarget" style="color: var(--color-danger);">ใช้เกินงบไป ฿{{ formatNumber(spentToday - dailyAllowanceTarget) }}!</span>
+              <span v-else style="color: var(--color-primary);">ยังเหลือโควตา ฿{{ formatNumber(dailyAllowanceTarget - spentToday) }}</span>
+              <span>เป้า: ฿{{ formatNumber(dailyAllowanceTarget) }}</span>
+            </div>
+          </div>
+
           <!-- Analysis text blocks -->
           <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; line-height: 1.5;">
             
@@ -766,6 +794,7 @@ export default {
       const target = dailyAllowanceTarget.value;
       const spent = spentToday.value;
       const pocketRemaining = freeSpendPocket.value?.remaining || 0;
+      const percentUsed = target > 0 ? Math.round((spent / target) * 100) : 0;
       
       let gradeText = 'ดีเยี่ยม';
       let gradeEmoji = '🟢';
@@ -826,7 +855,8 @@ export default {
         gradeStyle,
         advantages,
         drawbacks,
-        recommendations
+        recommendations,
+        percentUsed
       };
     });
 
