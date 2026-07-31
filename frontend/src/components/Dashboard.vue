@@ -492,6 +492,7 @@
 </template>
 
 <script>
+// Trigger redeploy for Vercel public status
 import { ref, watch, onMounted, computed } from 'vue';
 
 export default {
