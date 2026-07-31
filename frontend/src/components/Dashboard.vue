@@ -151,7 +151,7 @@
               <span style="font-size: 0.7rem; color: var(--text-muted);">✏️</span>
               <input 
                 type="date" 
-                :value="daysRemainingInfo.targetDateStr"
+                v-model="allowanceTargetInputDate"
                 @change="updateAllowanceTargetDate" 
                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
               />
@@ -570,6 +570,7 @@ export default {
     const categories = ref([]);
 
     const userProfile = ref({ allowance_target_date: null });
+    const allowanceTargetInputDate = ref('');
 
     const fetchUserProfile = async () => {
       try {
@@ -1270,6 +1271,10 @@ export default {
     };
 
     // Watchers
+    watch(() => daysRemainingInfo.value.targetDateStr, (newVal) => {
+      allowanceTargetInputDate.value = newVal;
+    }, { immediate: true });
+
     watch(() => props.month, () => {
       fetchData();
     });
@@ -1327,7 +1332,8 @@ export default {
       getInsightTextColor,
       getInsightIcon,
       userProfile,
-      updateAllowanceTargetDate
+      updateAllowanceTargetDate,
+      allowanceTargetInputDate
     };
   }
 };
