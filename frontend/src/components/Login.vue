@@ -2,19 +2,135 @@
   <div class="fb-login-wrapper">
     <div class="fb-login-container">
       
-      <!-- Left Column: Branding (Desktop only, centers on mobile) -->
+      <!-- LEFT COLUMN: Facebook-Style Illustration Collage & Tagline -->
       <div class="fb-brand-section">
-        <h1 class="fb-logo-text">finflow</h1>
+        <div class="collage-container">
+          <!-- Blue circular logo -->
+          <div class="logo-circle">
+            <span class="logo-inner-icon">f</span>
+          </div>
+
+          <!-- Floating card 1: Plant -->
+          <div class="collage-card card-plant">
+            <img src="https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=300&q=80" alt="Plant" />
+            <div class="card-icon-tag">🏡</div>
+          </div>
+
+          <!-- Floating card 2: Portrait -->
+          <div class="collage-card card-portrait">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Portrait" />
+            <span class="time-tag">⏱️ 16:45</span>
+          </div>
+
+          <!-- Floating card 3: Skatepark -->
+          <div class="collage-card card-skatepark">
+            <img src="https://images.unsplash.com/photo-1520156473893-b42419639e4d?auto=format&fit=crop&w=300&q=80" alt="Skatepark" />
+            <div class="card-star-tag">⭐</div>
+          </div>
+
+          <!-- Floating card 4: Wave avatar -->
+          <div class="collage-card card-avatar-circle">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Avatar" />
+          </div>
+
+          <!-- Stickers -->
+          <div class="sticker sticker-laugh">😂</div>
+          <div class="sticker sticker-heart">❤️</div>
+        </div>
+
         <h2 class="fb-tagline">
-          FinFlow ช่วยให้คุณเชื่อมต่อการเงิน จัดสรรงบประมาณกระเป๋าย่อย และวิเคราะห์พอร์ตหุ้นของคุณในที่เดียว
+          สำรวจสิ่ง<br />
+          ที่<span class="text-highlight">คุณชื่น<br />ชอบ</span>
         </h2>
       </div>
 
-      <!-- Right Column: Login Form Card -->
+      <!-- RIGHT COLUMN: Login Form Cards (Toggles between Quick, Password and Custom Login) -->
       <div class="fb-card-section">
-        <div class="fb-login-card">
-          <form @submit.prevent="handleLogin" class="fb-form">
-            <!-- Username Input -->
+        
+        <!-- View 1: Quick Recent Logins -->
+        <div v-if="view === 'quick'" class="fb-login-card">
+          <div class="card-header-row">
+            <span class="card-heading-title">เข้าสู่ระบบ Facebook</span>
+            <button class="settings-btn" @click="alertSettings">⚙️</button>
+          </div>
+
+          <div class="profiles-list">
+            <!-- Profile 1: Oat -->
+            <div class="profile-item" @click="selectProfile('oat', 'รตคโสิ น์ตวัรฐิ', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80')">
+              <div class="profile-avatar-wrapper">
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80" alt="Oat" />
+              </div>
+              <span class="profile-display-name">รตคโสิ น์ตวัรฐิ</span>
+              <span class="profile-arrow">❯</span>
+            </div>
+
+            <!-- Profile 2: Beem -->
+            <div class="profile-item" @click="selectProfile('beem', 'Anchariya Thongdee', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80')">
+              <div class="profile-avatar-wrapper">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" alt="Beem" />
+              </div>
+              <span class="profile-display-name">Anchariya Thongdee</span>
+              <span class="profile-arrow">❯</span>
+            </div>
+          </div>
+
+          <div class="action-buttons-stack">
+            <button class="btn-fb-white" @click="view = 'custom'">ใช้โปรไฟล์อื่น</button>
+            <button class="btn-fb-blue-outline" @click="alertCreate">สร้างบัญชีใหม่</button>
+          </div>
+        </div>
+
+        <!-- View 2: Password Prompt for Selected Profile -->
+        <div v-else-if="view === 'password'" class="fb-login-card">
+          <div class="password-prompt-header">
+            <div class="back-arrow" @click="view = 'quick'">❮</div>
+            <span class="card-heading-title">เข้าสู่ระบบด้วยรหัสผ่าน</span>
+          </div>
+
+          <div class="selected-profile-preview">
+            <img :src="selectedUser.avatar" alt="Avatar" class="prompt-avatar" />
+            <div class="prompt-display-name">{{ selectedUser.displayName }}</div>
+          </div>
+
+          <form @submit.prevent="handleQuickLogin" class="fb-form">
+            <div class="fb-input-wrapper" style="position: relative;">
+              <input 
+                v-model="password" 
+                :type="showPassword ? 'text' : 'password'" 
+                :placeholder="'ป้อนรหัสผ่านสำหรับ ' + selectedUser.displayName" 
+                required 
+                class="fb-input"
+                ref="passwordInput"
+              />
+              <button 
+                type="button" 
+                class="fb-password-toggle" 
+                @click="showPassword = !showPassword"
+                tabindex="-1"
+              >
+                {{ showPassword ? 'ซ่อน' : 'แสดง' }}
+              </button>
+            </div>
+
+            <button type="submit" class="fb-login-btn" :disabled="isLoading">
+              <span v-if="isLoading">กำลังเข้าสู่ระบบ...</span>
+              <span v-else>เข้าสู่ระบบ</span>
+            </button>
+          </form>
+
+          <div class="password-prompt-footer">
+            <a href="#" @click.prevent="alertForgot">ลืมรหัสผ่านใช่หรือไม่?</a>
+          </div>
+        </div>
+
+        <!-- View 3: Custom Login (Standard Form) -->
+        <div v-else-if="view === 'custom'" class="fb-login-card">
+          <div class="password-prompt-header">
+            <div class="back-arrow" @click="view = 'quick'">❮</div>
+            <span class="card-heading-title">ใช้บัญชีอื่นเข้าสู่ระบบ</span>
+          </div>
+
+          <form @submit.prevent="handleCustomLogin" class="fb-form" style="margin-top: 15px;">
             <div class="fb-input-wrapper">
               <input 
                 v-model="username" 
@@ -25,7 +141,6 @@
               />
             </div>
 
-            <!-- Password Input -->
             <div class="fb-input-wrapper" style="position: relative;">
               <input 
                 v-model="password" 
@@ -44,32 +159,20 @@
               </button>
             </div>
 
-            <!-- Submit Button -->
             <button type="submit" class="fb-login-btn" :disabled="isLoading">
               <span v-if="isLoading">กำลังเข้าสู่ระบบ...</span>
               <span v-else>เข้าสู่ระบบ</span>
             </button>
 
-            <!-- Forgot Password Link -->
             <div class="fb-forgot-pwd">
               <a href="#" @click.prevent="alertForgot">ลืมรหัสผ่านใช่หรือไม่?</a>
             </div>
-
-            <!-- Divider -->
-            <div class="fb-divider"></div>
-
-            <!-- Create New Account Button -->
-            <div class="fb-create-btn-wrapper">
-              <button type="button" class="fb-create-btn" @click="alertCreate">
-                สร้างบัญชีใหม่
-              </button>
-            </div>
           </form>
         </div>
-        
-        <!-- Bottom Link / Subtitle -->
+
+        <!-- Meta Branding Link -->
         <p class="fb-bottom-text">
-          <strong>สร้างเพจ</strong> สำหรับ oat และ beem เท่านั้นในการสลับบัญชีใช้งาน
+          <span class="meta-logo-symbol">∞</span> Meta
         </p>
       </div>
 
@@ -78,20 +181,72 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 
 export default {
   name: 'Login',
   emits: ['login-success'],
   setup(props, { emit }) {
+    const view = ref('quick'); // 'quick', 'password', 'custom'
     const username = ref('');
     const password = ref('');
     const showPassword = ref(false);
     const error = ref('');
     const isLoading = ref(false);
+    
+    const selectedUser = ref({
+      username: '',
+      displayName: '',
+      avatar: ''
+    });
 
-    const handleLogin = async () => {
-      error.value = '';
+    const passwordInput = ref(null);
+
+    const selectProfile = (userKey, displayName, avatar) => {
+      selectedUser.value = {
+        username: userKey,
+        displayName,
+        avatar
+      };
+      password.value = '';
+      showPassword.value = false;
+      view.value = 'password';
+      
+      // Auto focus password input
+      nextTick(() => {
+        if (passwordInput.value) {
+          passwordInput.value.focus();
+        }
+      });
+    };
+
+    const handleQuickLogin = async () => {
+      isLoading.value = true;
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: selectedUser.value.username,
+            password: password.value
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          emit('login-success', data.user);
+        } else {
+          alert(data.error || 'รหัสผ่านไม่ถูกต้อง');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์หลังบ้านได้');
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    const handleCustomLogin = async () => {
       isLoading.value = true;
       try {
         const res = await fetch('/api/auth/login', {
@@ -125,93 +280,443 @@ export default {
       alert('ระบบสมัครสมาชิกใหม่ปิดชั่วคราว! กรุณาใช้บัญชี oat หรือ beem ในการใช้งาน (รหัสผ่าน 123) ครับ 🔒');
     };
 
+    const alertSettings = () => {
+      alert('ระบบตั้งค่าหน้าจอเข้าสู่ระบบกำลังเตรียมความพร้อมใช้งานในอนาคต ⚙️');
+    };
+
     return {
+      view,
       username,
       password,
       showPassword,
       error,
       isLoading,
-      handleLogin,
+      selectedUser,
+      passwordInput,
+      selectProfile,
+      handleQuickLogin,
+      handleCustomLogin,
       alertForgot,
-      alertCreate
+      alertCreate,
+      alertSettings
     };
   }
 };
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&family=Outfit:wght@400;700;800&display=swap');
+
 .fb-login-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #f0f2f5;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif;
+  font-family: SFProDisplay-Regular, Helvetica, 'Sarabun', Arial, sans-serif;
   overflow-y: auto;
 }
 
-/* Container limits width and splits desktop columns */
 .fb-login-container {
   width: 100%;
-  max-width: 980px;
-  padding: 20px 40px 100px 40px;
+  max-width: 1000px;
+  padding: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 60px;
 }
 
-/* Left Column: Branding text */
+/* LEFT COLUMN: BRANDING & ILLUSTRATION COLLAGE */
 .fb-brand-section {
-  flex: 1;
+  flex: 1.1;
   max-width: 500px;
-  padding-bottom: 40px;
-  text-align: left;
-}
-
-.fb-logo-text {
-  color: #1877f2;
-  font-size: 4rem;
-  font-weight: bold;
-  letter-spacing: -2px;
-  margin: 0 0 10px -4px;
-  font-family: Helvetica, Arial, sans-serif;
+  padding-right: 40px;
+  border-right: 1px solid #dadde1;
+  display: flex;
+  flex-direction: column;
 }
 
 .fb-tagline {
-  font-size: 1.75rem;
-  font-weight: normal;
-  line-height: 1.34;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.15;
   color: #1c1e21;
-  margin: 0;
-  word-break: keep-all;
-  font-family: SFProDisplay-Regular, Helvetica, Arial, sans-serif;
+  margin: 30px 0 0 0;
+  letter-spacing: -1px;
+  text-align: left;
 }
 
-/* Right Column: Card section */
-.fb-card-section {
+.text-highlight {
+  color: #1877f2;
+}
+
+/* Collage Container & Layout */
+.collage-container {
+  position: relative;
   width: 100%;
-  max-width: 396px;
+  height: 320px;
+  margin-bottom: 20px;
+}
+
+/* Circular Facebook-style logo */
+.logo-circle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 60px;
+  height: 60px;
+  background-color: #1877f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.25);
+  z-index: 10;
+}
+
+.logo-inner-icon {
+  color: #ffffff;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 3rem;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-left: 15px;
+}
+
+/* Floating Card Base */
+.collage-card {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1.5px solid #ffffff;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.collage-card:hover {
+  transform: scale(1.03) translateY(-4px);
+}
+
+.collage-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+/* Card 1: Plant */
+.card-plant {
+  width: 130px;
+  height: 120px;
+  top: 60px;
+  left: 100px;
+  transform: rotate(-8deg);
+}
+
+.card-icon-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-size: 0.8rem;
+}
+
+/* Card 2: Portrait woman */
+.card-portrait {
+  width: 160px;
+  height: 200px;
+  top: 30px;
+  right: 50px;
+  transform: rotate(5deg);
+}
+
+.time-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #1877f2;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* Card 3: Skatepark */
+.card-skatepark {
+  width: 110px;
+  height: 120px;
+  bottom: 10px;
+  left: 120px;
+  transform: rotate(6deg);
+}
+
+.card-star-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #1877f2;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+}
+
+/* Card 4: Round profile avatar */
+.card-avatar-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  bottom: 20px;
+  right: 100px;
+  padding: 4px;
+  border: 3px solid #1877f2;
+  box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+}
+
+.card-avatar-circle img {
+  border-radius: 50%;
+}
+
+/* Stickers */
+.sticker {
+  position: absolute;
+  font-size: 2rem;
+  z-index: 15;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  animation: bounce 4s infinite ease-in-out alternate;
+}
+
+.sticker-laugh {
+  top: 40px;
+  left: 240px;
+  animation-delay: 1s;
+}
+
+.sticker-heart {
+  bottom: 120px;
+  right: 20px;
+  font-size: 2.2rem;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+
+/* RIGHT COLUMN: CARD SECTION */
+.fb-card-section {
+  flex: 0.9;
+  max-width: 410px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .fb-login-card {
   background: #ffffff;
-  border: none;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 24px;
   width: 100%;
   box-sizing: border-box;
 }
 
+/* Card Header row with settings cog */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.card-heading-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1c1e21;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #606770;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.settings-btn:hover {
+  background-color: #f0f2f5;
+}
+
+/* Saved Profiles list */
+.profiles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profile-item:hover {
+  background-color: #f2f3f5;
+}
+
+.profile-avatar-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 14px;
+  border: 1px solid #dddfe2;
+}
+
+.profile-avatar-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-display-name {
+  flex-grow: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1c1e21;
+  text-align: left;
+}
+
+.profile-arrow {
+  color: #bcc0c4;
+  font-size: 1.1rem;
+  padding-right: 4px;
+}
+
+/* Action Buttons */
+.action-buttons-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-fb-white {
+  background-color: #ffffff;
+  border: 1px solid #ccd0d5;
+  border-radius: 20px;
+  color: #4b4f56;
+  font-size: 15px;
+  font-weight: bold;
+  height: 40px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.btn-fb-white:hover {
+  background-color: #f5f6f7;
+}
+
+.btn-fb-blue-outline {
+  background-color: #ffffff;
+  border: 1px solid #1877f2;
+  border-radius: 20px;
+  color: #1877f2;
+  font-size: 15px;
+  font-weight: bold;
+  height: 40px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.btn-fb-blue-outline:hover {
+  background-color: #f0f6ff;
+}
+
+/* Password Prompt Page Styles */
+.password-prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.back-arrow {
+  font-size: 1.1rem;
+  color: #606770;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.back-arrow:hover {
+  background-color: #f0f2f5;
+}
+
+.selected-profile-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.prompt-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 1px solid #dddfe2;
+}
+
+.prompt-display-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1c1e21;
+}
+
+.password-prompt-footer {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.password-prompt-footer a {
+  color: #1877f2;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.password-prompt-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Custom/Standard form override input fields styling */
 .fb-form {
   display: flex;
   flex-direction: column;
@@ -246,7 +751,6 @@ export default {
   color: #8d949e;
 }
 
-/* Password Toggle text style like a link */
 .fb-password-toggle {
   position: absolute;
   right: 14px;
@@ -265,17 +769,14 @@ export default {
   text-decoration: underline;
 }
 
-/* Submit Log In Button */
 .fb-login-btn {
   background-color: #1877f2;
   border: none;
   border-radius: 6px;
   color: #ffffff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   height: 48px;
-  line-height: 48px;
-  padding: 0 16px;
   cursor: pointer;
   transition: background-color 0.1s;
   width: 100%;
@@ -288,16 +789,6 @@ export default {
   background-color: #166fe5;
 }
 
-.fb-login-btn:active {
-  background-color: #1464cc;
-}
-
-.fb-login-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Forgotten password link */
 .fb-forgot-pwd {
   text-align: center;
   margin-top: 4px;
@@ -307,95 +798,61 @@ export default {
   color: #1877f2;
   font-size: 14px;
   text-decoration: none;
-  font-family: SFProText-Regular, Helvetica, Arial, sans-serif;
 }
 
 .fb-forgot-pwd a:hover {
   text-decoration: underline;
 }
 
-/* Horizontal line divider */
-.fb-divider {
-  align-items: center;
-  border-bottom: 1px solid #dadde1;
-  display: flex;
-  margin: 8px 0;
-  text-align: center;
-}
-
-/* Create New Account Button */
-.fb-create-btn-wrapper {
-  text-align: center;
-  padding-top: 6px;
-}
-
-.fb-create-btn {
-  background-color: #42b72a;
-  border: none;
-  border-radius: 6px;
-  color: #ffffff;
-  font-size: 17px;
-  font-weight: bold;
-  height: 48px;
-  line-height: 48px;
-  padding: 0 16px;
-  cursor: pointer;
-  transition: background-color 0.1s;
-}
-
-.fb-create-btn:hover {
-  background-color: #36a420;
-}
-
-.fb-create-btn:active {
-  background-color: #2b9217;
-}
-
-/* Sub-card small text */
+/* Brand Text Infinity symbol */
 .fb-bottom-text {
-  font-size: 14px;
-  color: #1c1e21;
+  font-size: 13px;
+  color: #8d949e;
   text-align: center;
-  margin-top: 20px;
-  font-family: SFProText-Regular, Helvetica, Arial, sans-serif;
+  margin-top: 30px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
-.fb-bottom-text strong {
-  cursor: pointer;
+.meta-logo-symbol {
+  font-size: 1.45rem;
+  color: #1877f2;
+  line-height: 1;
 }
 
-.fb-bottom-text strong:hover {
-  text-decoration: underline;
-}
-
-/* Responsive queries */
+/* RESPONSIVE LAYOUT MEDIA QUERIES */
 @media (max-width: 900px) {
   .fb-login-container {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px 20px 50px 20px;
+    padding: 20px;
     gap: 40px;
   }
 
   .fb-brand-section {
     text-align: center;
-    max-width: 400px;
-    padding-bottom: 0;
-  }
-
-  .fb-logo-text {
-    font-size: 3.25rem;
-    margin: 0 0 8px 0;
+    padding-right: 0;
+    border-right: none;
+    align-items: center;
   }
 
   .fb-tagline {
-    font-size: 1.35rem;
-    line-height: 1.3;
+    font-size: 2.25rem;
+    margin: 20px 0 0 0;
+  }
+
+  .collage-container {
+    max-width: 360px;
+    height: 280px;
   }
 
   .fb-card-section {
     max-width: 396px;
+    width: 100%;
   }
 }
 </style>
