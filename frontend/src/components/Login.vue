@@ -72,6 +72,15 @@
               <span class="profile-display-name">Beem</span>
               <span class="profile-arrow">❯</span>
             </div>
+
+            <!-- Profile 3: Krubob -->
+            <div class="profile-item" @click="selectProfile('krubob', 'Krubob', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80')">
+              <div class="profile-avatar-wrapper">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80" alt="Krubob" />
+              </div>
+              <span class="profile-display-name">Krubob</span>
+              <span class="profile-arrow">❯</span>
+            </div>
           </div>
 
           <div class="action-buttons-stack">
@@ -273,11 +282,11 @@ export default {
     };
 
     const alertForgot = () => {
-      alert('Password Hint: The password for both Oat and Beem is 123 🔑');
+      alert('Password Hint: The password for Oat, Beem, and Krubob is 123 🔑');
     };
 
     const alertCreate = () => {
-      alert('Registration is closed! Please use Oat or Beem (password: 123) to log in. 🔒');
+      alert('Registration is closed! Please use Oat, Beem, or Krubob (password: 123) to log in. 🔒');
     };
 
     const alertSettings = () => {
