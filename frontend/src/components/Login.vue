@@ -39,8 +39,8 @@
         </div>
 
         <h2 class="fb-tagline">
-          สำรวจสิ่ง<br />
-          ที่<span class="text-highlight">คุณชื่น<br />ชอบ</span>
+          Explore<br />
+          things <span class="text-highlight">you<br />like</span>
         </h2>
       </div>
 
@@ -50,33 +50,33 @@
         <!-- View 1: Quick Recent Logins -->
         <div v-if="view === 'quick'" class="fb-login-card">
           <div class="card-header-row">
-            <span class="card-heading-title">เข้าสู่ระบบ Facebook</span>
+            <span class="card-heading-title">Recent Logins</span>
             <button class="settings-btn" @click="alertSettings">⚙️</button>
           </div>
 
           <div class="profiles-list">
             <!-- Profile 1: Oat -->
-            <div class="profile-item" @click="selectProfile('oat', 'รตคโสิ น์ตวัรฐิ', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80')">
+            <div class="profile-item" @click="selectProfile('oat', 'Oat', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80')">
               <div class="profile-avatar-wrapper">
                 <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80" alt="Oat" />
               </div>
-              <span class="profile-display-name">รตคโสิ น์ตวัรฐิ</span>
+              <span class="profile-display-name">Oat</span>
               <span class="profile-arrow">❯</span>
             </div>
 
             <!-- Profile 2: Beem -->
-            <div class="profile-item" @click="selectProfile('beem', 'Anchariya Thongdee', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80')">
+            <div class="profile-item" @click="selectProfile('beem', 'Beem', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80')">
               <div class="profile-avatar-wrapper">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" alt="Beem" />
               </div>
-              <span class="profile-display-name">Anchariya Thongdee</span>
+              <span class="profile-display-name">Beem</span>
               <span class="profile-arrow">❯</span>
             </div>
           </div>
 
           <div class="action-buttons-stack">
-            <button class="btn-fb-white" @click="view = 'custom'">ใช้โปรไฟล์อื่น</button>
-            <button class="btn-fb-blue-outline" @click="alertCreate">สร้างบัญชีใหม่</button>
+            <button class="btn-fb-white" @click="view = 'custom'">Log In to Another Account</button>
+            <button class="btn-fb-blue-outline" @click="alertCreate">Create New Account</button>
           </div>
         </div>
 
@@ -84,7 +84,7 @@
         <div v-else-if="view === 'password'" class="fb-login-card">
           <div class="password-prompt-header">
             <div class="back-arrow" @click="view = 'quick'">❮</div>
-            <span class="card-heading-title">เข้าสู่ระบบด้วยรหัสผ่าน</span>
+            <span class="card-heading-title">Enter Password</span>
           </div>
 
           <div class="selected-profile-preview">
@@ -97,7 +97,7 @@
               <input 
                 v-model="password" 
                 :type="showPassword ? 'text' : 'password'" 
-                :placeholder="'ป้อนรหัสผ่านสำหรับ ' + selectedUser.displayName" 
+                :placeholder="'Password for ' + selectedUser.displayName" 
                 required 
                 class="fb-input"
                 ref="passwordInput"
@@ -108,18 +108,18 @@
                 @click="showPassword = !showPassword"
                 tabindex="-1"
               >
-                {{ showPassword ? 'ซ่อน' : 'แสดง' }}
+                {{ showPassword ? 'Hide' : 'Show' }}
               </button>
             </div>
 
             <button type="submit" class="fb-login-btn" :disabled="isLoading">
-              <span v-if="isLoading">กำลังเข้าสู่ระบบ...</span>
-              <span v-else>เข้าสู่ระบบ</span>
+              <span v-if="isLoading">Logging in...</span>
+              <span v-else>Log In</span>
             </button>
           </form>
 
           <div class="password-prompt-footer">
-            <a href="#" @click.prevent="alertForgot">ลืมรหัสผ่านใช่หรือไม่?</a>
+            <a href="#" @click.prevent="alertForgot">Forgotten password?</a>
           </div>
         </div>
 
@@ -127,7 +127,7 @@
         <div v-else-if="view === 'custom'" class="fb-login-card">
           <div class="password-prompt-header">
             <div class="back-arrow" @click="view = 'quick'">❮</div>
-            <span class="card-heading-title">ใช้บัญชีอื่นเข้าสู่ระบบ</span>
+            <span class="card-heading-title">Log In to Facebook</span>
           </div>
 
           <form @submit.prevent="handleCustomLogin" class="fb-form" style="margin-top: 15px;">
@@ -135,7 +135,7 @@
               <input 
                 v-model="username" 
                 type="text" 
-                placeholder="ชื่อผู้ใช้งาน หรือ หมายเลขโทรศัพท์" 
+                placeholder="Username or phone number" 
                 required 
                 class="fb-input"
               />
@@ -145,7 +145,7 @@
               <input 
                 v-model="password" 
                 :type="showPassword ? 'text' : 'password'" 
-                placeholder="รหัสผ่าน" 
+                placeholder="Password" 
                 required 
                 class="fb-input"
               />
@@ -155,17 +155,17 @@
                 @click="showPassword = !showPassword"
                 tabindex="-1"
               >
-                {{ showPassword ? 'ซ่อน' : 'แสดง' }}
+                {{ showPassword ? 'Hide' : 'Show' }}
               </button>
             </div>
 
             <button type="submit" class="fb-login-btn" :disabled="isLoading">
-              <span v-if="isLoading">กำลังเข้าสู่ระบบ...</span>
-              <span v-else>เข้าสู่ระบบ</span>
+              <span v-if="isLoading">Logging in...</span>
+              <span v-else>Log In</span>
             </button>
 
             <div class="fb-forgot-pwd">
-              <a href="#" @click.prevent="alertForgot">ลืมรหัสผ่านใช่หรือไม่?</a>
+              <a href="#" @click.prevent="alertForgot">Forgotten password?</a>
             </div>
           </form>
         </div>
@@ -236,11 +236,11 @@ export default {
         if (res.ok && data.success) {
           emit('login-success', data.user);
         } else {
-          alert(data.error || 'รหัสผ่านไม่ถูกต้อง');
+          alert(data.error || 'Incorrect password.');
         }
       } catch (err) {
         console.error(err);
-        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์หลังบ้านได้');
+        alert('Cannot connect to the server.');
       } finally {
         isLoading.value = false;
       }
@@ -262,26 +262,26 @@ export default {
         if (res.ok && data.success) {
           emit('login-success', data.user);
         } else {
-          alert(data.error || 'ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง');
+          alert(data.error || 'Incorrect username or password.');
         }
       } catch (err) {
         console.error(err);
-        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์หลังบ้านได้');
+        alert('Cannot connect to the server.');
       } finally {
         isLoading.value = false;
       }
     };
 
     const alertForgot = () => {
-      alert('คำใบ้รหัสผ่าน: รหัสผ่านของ oat และ beem คือ 123 ครับ 🔑');
+      alert('Password Hint: The password for both Oat and Beem is 123 🔑');
     };
 
     const alertCreate = () => {
-      alert('ระบบสมัครสมาชิกใหม่ปิดชั่วคราว! กรุณาใช้บัญชี oat หรือ beem ในการใช้งาน (รหัสผ่าน 123) ครับ 🔒');
+      alert('Registration is closed! Please use Oat or Beem (password: 123) to log in. 🔒');
     };
 
     const alertSettings = () => {
-      alert('ระบบตั้งค่าหน้าจอเข้าสู่ระบบกำลังเตรียมความพร้อมใช้งานในอนาคต ⚙️');
+      alert('Login configurations are coming soon! ⚙️');
     };
 
     return {
