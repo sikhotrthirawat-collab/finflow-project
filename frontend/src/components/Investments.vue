@@ -257,6 +257,102 @@
           </form>
         </div>
 
+        <!-- DCA Stock Planner Widget -->
+        <div class="glass-card" style="padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--shadow-md);">
+          <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+            <span>📋</span> DCA Stock Planner (แผนออมหุ้นรายเดือน)
+          </h4>
+          <p style="font-size: 0.725rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.4;">
+            แผนการออมหุ้นแบบ DCA ตลอดชีวิตสำหรับหุ้นเป้าหมาย 6 ตัว โดยแนะนำให้เลือกซื้อหุ้นตามรายเดือน และคำนวณเปรียบเทียบสัดส่วนเป้าหมาย (Target) กับสัดส่วนถือครองจริง (Actual) ของคุณ
+          </p>
+
+          <!-- Current Month DCA Recommendation Banner -->
+          <div style="background: rgba(24, 119, 242, 0.06); border: 1px solid rgba(24, 119, 242, 0.15); padding: 12px 16px; border-radius: 14px; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #1877f2; text-transform: uppercase; letter-spacing: 0.5px;">
+                💡 Target for {{ currentDcaTarget?.name }} (เดือน {{ currentDcaTarget?.month }})
+              </span>
+              <span style="font-size: 0.7rem; font-weight: 600; background: #1877f2; color: #fff; padding: 2px 8px; border-radius: 10px;">
+                {{ currentDcaTarget?.targetPercent }}% Target Allocation
+              </span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+              <div>
+                <div style="font-family: var(--font-display); font-weight: 850; font-size: 1.4rem; color: var(--text-primary); line-height: 1.1;">
+                  {{ currentDcaTarget?.symbol }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">
+                  {{ currentDcaTarget?.desc }}
+                </div>
+              </div>
+              <button @click="autoFillDca(currentDcaTarget?.symbol)" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; border-radius: 8px; display: flex; align-items: center; gap: 4px; background: #1877f2; border: none; box-shadow: 0 2px 8px rgba(24, 119, 242, 0.2);">
+                ⚡ กรอกข้อมูลซื้อทันที
+              </button>
+            </div>
+          </div>
+
+          <!-- Comparison Table with Progress Bars -->
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.725rem; font-weight: 700; color: var(--text-secondary); border-bottom: 1.5px solid var(--border-color); padding-bottom: 6px;">
+              <span>Stock Symbol</span>
+              <span style="display: flex; gap: 20px;">
+                <span style="width: 45px; text-align: right;">Target</span>
+                <span style="width: 45px; text-align: right;">Actual</span>
+              </span>
+            </div>
+            
+            <div v-for="item in dcaComparison" :key="item.symbol" style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+                <span style="font-weight: 700; color: var(--text-primary);">
+                  {{ item.symbol }}
+                  <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500; margin-left: 4px;">
+                    ({{ item.name }})
+                  </span>
+                </span>
+                <span style="display: flex; gap: 20px; font-family: var(--font-display); font-weight: 600;">
+                  <span style="color: var(--text-muted); width: 45px; text-align: right;">{{ item.target }}%</span>
+                  <span :style="{ color: item.actual < item.target ? '#af52de' : '#34c759' }" style="width: 45px; text-align: right;">
+                    {{ item.actual }}%
+                  </span>
+                </span>
+              </div>
+              <!-- Progress Bar -->
+              <div style="position: relative; height: 6px; background: rgba(0,0,0,0.04); border-radius: 3px; overflow: hidden; width: 100%;">
+                <!-- Target line indicator overlay -->
+                <div :style="{ left: item.target + '%' }" style="position: absolute; top: 0; width: 2px; height: 100%; background: #bcc0c4; z-index: 5;"></div>
+                <!-- Actual filled bar -->
+                <div :style="{ width: item.actual + '%', background: item.actual < item.target ? '#af52de' : '#34c759' }" style="position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- All 12-Month Schedule List Grid -->
+          <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+            <button @click="showDcaSchedule = !showDcaSchedule" style="width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.01); border: none; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; cursor: pointer; outline: none;">
+              <span>📅 ตารางแผน DCA รายเดือน (12-Month Schedule)</span>
+              <span>{{ showDcaSchedule ? '▲' : '▼' }}</span>
+            </button>
+            <div v-show="showDcaSchedule" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border-color); border-top: 1px solid var(--border-color);">
+              <div v-for="item in dcaSchedule" :key="item.month" 
+                   :style="{ background: item.month === selectedMonthIndex ? 'rgba(24, 119, 242, 0.04)' : 'var(--bg-card)' }"
+                   style="padding: 8px 10px; font-size: 0.75rem; display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span :style="{ fontWeight: item.month === selectedMonthIndex ? '800' : '600', color: item.month === selectedMonthIndex ? '#1877f2' : 'var(--text-secondary)' }">
+                    Month {{ item.month }} ({{ item.name.substring(0,3) }})
+                  </span>
+                  <span v-if="item.month === selectedMonthIndex" style="font-size: 0.6rem; background: rgba(24, 119, 242, 0.1); color: #1877f2; padding: 1px 4px; border-radius: 4px; font-weight: 800;">
+                    เดือนนี้
+                  </span>
+                </div>
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+                  <span>{{ item.symbol }}</span>
+                  <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">{{ item.targetPercent }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Full Ledger History List -->
         <div class="glass-card" style="padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--shadow-md);">
           <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 6px;">
@@ -340,6 +436,67 @@ export default {
     const chartCanvas = ref(null);
     const activeFormTab = ref('stock'); // 'stock' or 'cash'
     let chartInstance = null;
+
+    const showDcaSchedule = ref(false);
+
+    const dcaSchedule = [
+      { month: 1, name: 'January', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
+      { month: 2, name: 'February', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67 },
+      { month: 3, name: 'March', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
+      { month: 4, name: 'April', symbol: 'ASML', desc: 'ASML Holding', targetPercent: 16.67 },
+      { month: 5, name: 'May', symbol: 'VT', desc: 'Vanguard Total World Stock ETF', targetPercent: 16.67 },
+      { month: 6, name: 'June', symbol: 'AMZN', desc: 'Amazon.com Inc', targetPercent: 8.33 },
+      { month: 7, name: 'July', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
+      { month: 8, name: 'August', symbol: 'V', desc: 'Visa Inc', targetPercent: 8.33 },
+      { month: 9, name: 'September', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
+      { month: 10, name: 'October', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67 },
+      { month: 11, name: 'November', symbol: 'ASML', desc: 'ASML Holding', targetPercent: 16.67 },
+      { month: 12, name: 'December', symbol: 'VT', desc: 'Vanguard Total World Stock ETF', targetPercent: 16.67 }
+    ];
+
+    const selectedMonthIndex = computed(() => {
+      if (!props.month) return new Date().getMonth() + 1;
+      const parts = props.month.split('-');
+      return parseInt(parts[1], 10);
+    });
+
+    const currentDcaTarget = computed(() => {
+      const m = selectedMonthIndex.value;
+      return dcaSchedule.find(item => item.month === m);
+    });
+
+    const dcaComparison = computed(() => {
+      const total = totalInvestedCost.value || 0;
+      const holdings = portfolioData.value.holdings || [];
+      
+      const getActualCost = (symbols) => {
+        const match = holdings.find(h => symbols.includes(h.symbol.toUpperCase()));
+        return match ? parseFloat(match.investedCapital || 0) : 0;
+      };
+
+      const list = [
+        { symbol: 'VOO', name: 'S&P 500 ETF', target: 33.33, actual: 0, actualCost: getActualCost(['VOO']) },
+        { symbol: 'MSFT', name: 'Microsoft', target: 16.67, actual: 0, actualCost: getActualCost(['MSFT', 'MICROSOFT']) },
+        { symbol: 'ASML', name: 'ASML Holding', target: 16.67, actual: 0, actualCost: getActualCost(['ASML']) },
+        { symbol: 'VT', name: 'Vanguard Total World', target: 16.67, actual: 0, actualCost: getActualCost(['VT']) },
+        { symbol: 'AMZN', name: 'Amazon', target: 8.33, actual: 0, actualCost: getActualCost(['AMZN', 'AMAZON']) },
+        { symbol: 'V', name: 'Visa', target: 8.33, actual: 0, actualCost: getActualCost(['V', 'VISA']) }
+      ];
+
+      if (total > 0) {
+        list.forEach(item => {
+          item.actual = parseFloat(((item.actualCost / total) * 100).toFixed(2));
+        });
+      }
+
+      return list;
+    });
+
+    const autoFillDca = (symbol) => {
+      form.value.symbol = symbol;
+      form.value.currency = 'USD';
+      activeFormTab.value = 'stock';
+    };
     
     const form = ref({
       symbol: '',
@@ -1005,7 +1162,13 @@ export default {
       getTypeText,
       getTransactionSign,
       getTransactionColor,
-      exportPDF
+      exportPDF,
+      showDcaSchedule,
+      dcaSchedule,
+      selectedMonthIndex,
+      currentDcaTarget,
+      dcaComparison,
+      autoFillDca
     };
   }
 };
