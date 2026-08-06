@@ -180,6 +180,17 @@
             </div>
           </div>
 
+          <!-- Cash Pocket Integration Tip/Badge -->
+          <div style="font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 12px; border-radius: 10px; margin-bottom: 12px; font-weight: 600;"
+               :style="cashPocket ? { background: 'rgba(16, 185, 129, 0.08)', color: '#34c759', border: '1px solid rgba(16, 185, 129, 0.15)' } : { background: 'rgba(0, 122, 255, 0.05)', color: 'var(--color-primary)', border: '1px solid rgba(0, 122, 255, 0.12)' }">
+            <template v-if="cashPocket">
+              <span>🔋</span> รวมคำนวณร่วมกับ Pocket "เงินสด" อีก ฿{{ formatNumber(cashPocket.remaining) }} แล้ว
+            </template>
+            <template v-else>
+              <span>💡</span> Tip: คุณสามารถสร้าง Pocket ชื่อ "เงินสด" เพื่อรวมคิดกับงบกินใช้นี้ได้
+            </template>
+          </div>
+ 
           <!-- Quick Daily Logger Form -->
           <form @submit.prevent="submitDailySpend">
             <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -234,7 +245,7 @@
                 </button>
               </div>
               <div style="font-size: 0.725rem; color: var(--text-muted); text-align: center; margin-top: 4px;">
-                *หักจากซอง <b>"เหลือใช้"</b> อัตโนมัติ (คงเหลือสะสม ฿{{ formatNumber(freeSpendPocket?.remaining || 0) }})
+                *หักจากซอง <b>"เหลือใช้"</b> อัตโนมัติ (คงเหลือสะสม ฿{{ formatNumber(freeSpendPocket?.remaining || 0) }}<span v-if="cashPocket"> + เงินสด ฿{{ formatNumber(cashPocket.remaining) }}</span>)
               </div>
             </div>
           </form>
@@ -847,6 +858,18 @@ export default {
       return budgetProgressList.value.find(p => p.category === 'เหลือใช้') || null;
     });
 
+    // Find the 'เงินสด' (Cash) pocket
+    const cashPocket = computed(() => {
+      return budgetProgressList.value.find(p => p.category.trim() === 'เงินสด') || null;
+    });
+
+    // Total allowance pool remaining (Free Spend + Cash Pocket remaining)
+    const totalAllowancePoolRemaining = computed(() => {
+      const freeRemaining = freeSpendPocket.value ? freeSpendPocket.value.remaining : 0;
+      const cashRemaining = cashPocket.value ? cashPocket.value.remaining : 0;
+      return freeRemaining + cashRemaining;
+    });
+
     // Calculate how much has been spent today under the 'เหลือใช้' category
     const spentToday = computed(() => {
       const today = new Date();
@@ -862,7 +885,7 @@ export default {
     // Daily Recommended Target: remaining balance before today's spend / remaining days
     const dailyAllowanceTarget = computed(() => {
       if (!freeSpendPocket.value) return 0;
-      const totalPoolForRemainingDays = freeSpendPocket.value.remaining + spentToday.value;
+      const totalPoolForRemainingDays = totalAllowancePoolRemaining.value + spentToday.value;
       const allowance = totalPoolForRemainingDays / daysRemainingInfo.value.remainingDays;
       return allowance > 0 ? allowance : 0;
     });
@@ -884,7 +907,7 @@ export default {
     const allowanceReport = computed(() => {
       const target = dailyAllowanceTarget.value;
       const spent = spentToday.value;
-      const pocketRemaining = freeSpendPocket.value?.remaining || 0;
+      const pocketRemaining = totalAllowancePoolRemaining.value;
       const percentUsed = target > 0 ? Math.round((spent / target) * 100) : 0;
       
       let gradeText = 'ดีเยี่ยม';
@@ -1333,7 +1356,9 @@ export default {
       getInsightIcon,
       userProfile,
       updateAllowanceTargetDate,
-      allowanceTargetInputDate
+      allowanceTargetInputDate,
+      cashPocket,
+      totalAllowancePoolRemaining
     };
   }
 };
