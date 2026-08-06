@@ -909,7 +909,7 @@ export default {
       return freeRemaining + cashRemaining;
     });
 
-    // Calculate how much has been spent today under the 'เหลือใช้' category
+    // Calculate how much has been spent today under the 'เหลือใช้' or 'เงินสด' categories
     const spentToday = computed(() => {
       const today = new Date();
       const todayStr = today.getFullYear() + '-' + 
@@ -917,7 +917,7 @@ export default {
         String(today.getDate()).padStart(2, '0');
 
       return allTransactions.value
-        .filter(tx => tx.type === 'expense' && tx.category === 'เหลือใช้' && tx.date.startsWith(todayStr))
+        .filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด') && tx.date.startsWith(todayStr))
         .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
     });
 
