@@ -292,8 +292,8 @@
         </span>
       </h4>
 
-      <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem;">
-        <div :style="{ height: '280px', minWidth: hasNoExpensesThisMonth ? '100%' : '650px', position: 'relative' }">
+      <div style="width: 100%; margin-top: 1rem;">
+        <div style="height: 280px; width: 100%; position: relative;">
           <canvas ref="dailyChartCanvas"></canvas>
           <div v-if="hasNoExpensesThisMonth" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
             <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
@@ -1439,6 +1439,14 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 10,
+              right: 10,
+              top: 10,
+              bottom: 5
+            }
+          },
           scales: {
             y: {
               beginAtZero: true,
@@ -1446,7 +1454,11 @@ export default {
                 color: 'rgba(255, 255, 255, 0.05)'
               },
               ticks: {
-                color: 'rgba(255, 255, 255, 0.6)',
+                color: 'rgba(255, 255, 255, 0.85)',
+                font: {
+                  family: 'Sarabun, sans-serif',
+                  size: 10
+                },
                 callback: value => '฿' + value
               }
             },
@@ -1455,7 +1467,11 @@ export default {
                 display: false
               },
               ticks: {
-                color: 'rgba(255, 255, 255, 0.6)'
+                color: 'rgba(255, 255, 255, 0.85)',
+                font: {
+                  family: 'Sarabun, sans-serif',
+                  size: 9
+                }
               }
             }
           },
