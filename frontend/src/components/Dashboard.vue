@@ -443,6 +443,44 @@
       </div>
     </div>
 
+    <!-- Modal 5: Choose Deduct Pocket for Quick Spend -->
+    <div class="modal-overlay" :class="{ active: isQuickSpendChoiceModalOpen }" @click.self="isQuickSpendChoiceModalOpen = false">
+      <div class="modal-content" style="max-width: 400px; border-radius: 24px; padding: 1.5rem; text-align: center;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💸</div>
+        <h3 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 8px;">เลือกกระเป๋าเพื่อจ่ายออก</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+          คุณกำลังทำรายการจ่าย: <b>{{ dailyForm.description }}</b><br/>
+          จำนวนเงิน: <span style="font-weight: 800; color: var(--color-danger); font-size: 1.1rem;">฿{{ formatNumber(dailyForm.amount) }}</span>
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+          <!-- Option 1: ซองเหลือใช้ -->
+          <button @click="executeDailySpendWithCategory('เหลือใช้')" class="btn btn-primary" style="padding: 12px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, var(--color-primary) 0%, #2563eb 100%); border: none; cursor: pointer; color: white;">
+            <span style="font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+              <span>💸</span> ซองเหลือใช้
+            </span>
+            <span style="font-size: 0.8rem; font-weight: 600; opacity: 0.8;">
+              คงเหลือ ฿{{ formatNumber(freeSpendPocket?.remaining || 0) }}
+            </span>
+          </button>
+
+          <!-- Option 2: ซองเงินสด -->
+          <button v-if="cashPocket" @click="executeDailySpendWithCategory('เงินสด')" class="btn btn-success" style="padding: 12px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); cursor: pointer; color: white;">
+            <span style="font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+              <span>💵</span> ซองเงินสด
+            </span>
+            <span style="font-size: 0.8rem; font-weight: 600; opacity: 0.8;">
+              คงเหลือ ฿{{ formatNumber(cashPocket.remaining) }}
+            </span>
+          </button>
+        </div>
+
+        <button @click="isQuickSpendChoiceModalOpen = false" class="btn btn-secondary" style="width: 100%; border-radius: 12px; font-weight: 700; cursor: pointer;">
+          ยกเลิกรายการ
+        </button>
+      </div>
+    </div>
+
     <!-- Allowance Analysis Modal -->
     <div class="modal-overlay" :class="{ active: isAllowanceAnalysisModalOpen }" @click.self="closeAllowanceAnalysisModal">
       <div class="modal-content" style="max-width: 550px; border-radius: 24px;">
@@ -629,6 +667,7 @@ export default {
     const selectedEnvelope = ref(null);
     const selectedEnvelopeForHistory = ref(null);
     const isAllowanceAnalysisModalOpen = ref(false);
+    const isQuickSpendChoiceModalOpen = ref(false);
 
     // Form inputs
     const incomeForm = ref({
@@ -1172,9 +1211,20 @@ export default {
       }
     };
 
-    // Submit Daily Expense (Deducts from "เหลือใช้")
+    // Submit Daily Expense (Deducts from "เหลือใช้" or prompts choice)
     const submitDailySpend = async () => {
       if (!dailyForm.value.description || !dailyForm.value.amount || !dailyForm.value.date) return;
+      
+      // If the cash pocket exists, open the selection modal to let the user choose
+      if (cashPocket.value) {
+        isQuickSpendChoiceModalOpen.value = true;
+      } else {
+        // Otherwise directly deduct from "เหลือใช้"
+        await executeDailySpendWithCategory('เหลือใช้');
+      }
+    };
+
+    const executeDailySpendWithCategory = async (category) => {
       try {
         const res = await fetch('/api/transactions', {
           method: 'POST',
@@ -1185,7 +1235,7 @@ export default {
           body: JSON.stringify({
             date: parseDateText(dailyForm.value.date),
             type: 'expense',
-            category: 'เหลือใช้',
+            category: category,
             amount: dailyForm.value.amount,
             description: `กินใช้รายวัน: ${dailyForm.value.description}`
           })
@@ -1197,6 +1247,7 @@ export default {
             description: '', 
             amount: '' 
           };
+          isQuickSpendChoiceModalOpen.value = false;
           fetchData();
           emit('update-data');
         }
@@ -1358,7 +1409,9 @@ export default {
       updateAllowanceTargetDate,
       allowanceTargetInputDate,
       cashPocket,
-      totalAllowancePoolRemaining
+      totalAllowancePoolRemaining,
+      isQuickSpendChoiceModalOpen,
+      executeDailySpendWithCategory
     };
   }
 };
