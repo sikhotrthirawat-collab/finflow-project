@@ -1450,11 +1450,14 @@ export default {
           scales: {
             y: {
               beginAtZero: true,
+              suggestedMax: 500,
               grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
               },
               ticks: {
                 color: '#ffffff',
+                autoSkip: false,
+                maxTicksLimit: 6,
                 font: {
                   family: 'Sarabun, sans-serif',
                   size: 10
