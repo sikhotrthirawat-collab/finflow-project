@@ -281,7 +281,25 @@
       </div>
     </div>
 
+    <!-- Daily Spending Trend Chart (สถิติการใช้จ่ายรายวัน) -->
+    <div class="glass-card" style="border-radius: 24px; padding: 1.5rem; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--shadow-md); margin-top: 2rem; margin-bottom: 2rem;">
+      <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+        <span style="display: flex; align-items: center; gap: 6px;">
+          <span>📈</span> สถิติการใช้จ่ายรายวันของเดือนนี้ (Daily Spending Chart)
+        </span>
+        <span style="font-size: 0.75rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 20px;">
+          เทียบกับงบแนะนำรายวัน
+        </span>
+      </h4>
 
+      <div style="height: 280px; position: relative; margin-top: 1rem;">
+        <canvas ref="dailyChartCanvas"></canvas>
+        <div v-if="hasNoExpensesThisMonth" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+          <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
+          ไม่มีข้อมูลรายจ่ายการกินใช้ในเดือนนี้เพื่อวาดกราฟ
+        </div>
+      </div>
+    </div>
 
     <!-- Modal 1: Quick Income Modal -->
     <div class="modal-overlay" :class="{ active: isIncomeModalOpen }" @click.self="closeModals">
@@ -589,7 +607,8 @@
 
 <script>
 // Trigger redeploy for Vercel public status
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted, computed, nextTick } from 'vue';
+import Chart from 'chart.js/auto';
 
 export default {
   name: 'Dashboard',
@@ -1042,6 +1061,7 @@ export default {
         if (resTx.ok) {
           allTransactions.value = await resTx.json();
           recentTransactions.value = allTransactions.value.slice(0, 5); // display only top 5 recent
+          nextTick(updateDailyChart);
         }
         // Set default date if empty
         if (!dailyForm.value.date) {
@@ -1344,6 +1364,120 @@ export default {
       // Direct redirect logic
     };
 
+    // Daily Spending Chart variables and rendering
+    const dailyChartCanvas = ref(null);
+    let dailyChartInstance = null;
+
+    const hasNoExpensesThisMonth = computed(() => {
+      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
+      return dailyExpenses.length === 0;
+    });
+
+    const updateDailyChart = () => {
+      if (!dailyChartCanvas.value) return;
+
+      const totalDays = daysRemainingInfo.value.totalDays || 30;
+      const dailyTotals = Array(totalDays).fill(0);
+      
+      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
+      dailyExpenses.forEach(tx => {
+        const txDate = new Date(tx.date);
+        const day = txDate.getDate(); // 1-indexed
+        if (day >= 1 && day <= totalDays) {
+          dailyTotals[day - 1] += parseFloat(tx.amount);
+        }
+      });
+
+      const allowanceTarget = dailyAllowanceTarget.value;
+      const limitData = Array(totalDays).fill(allowanceTarget);
+
+      const backgroundColors = dailyTotals.map(amount => {
+        return amount > allowanceTarget 
+          ? 'rgba(239, 68, 68, 0.7)' // Red warning for exceeding target
+          : 'rgba(59, 130, 246, 0.6)'; // Blue for below target
+      });
+
+      const borderColors = dailyTotals.map(amount => {
+        return amount > allowanceTarget ? '#ef4444' : '#3b82f6';
+      });
+
+      if (dailyChartInstance) {
+        dailyChartInstance.destroy();
+      }
+
+      if (hasNoExpensesThisMonth.value) {
+        return;
+      }
+
+      dailyChartInstance = new Chart(dailyChartCanvas.value, {
+        type: 'bar',
+        data: {
+          labels: Array.from({ length: totalDays }, (_, i) => String(i + 1)),
+          datasets: [
+            {
+              label: 'งบแนะนำรายวัน (฿)',
+              type: 'line',
+              data: limitData,
+              borderColor: '#10b981',
+              borderWidth: 2,
+              borderDash: [6, 6],
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'ยอดใช้จ่ายจริง (฿)',
+              data: dailyTotals,
+              backgroundColor: backgroundColors,
+              borderColor: borderColors,
+              borderWidth: 1,
+              borderRadius: 8
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)'
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.6)',
+                callback: value => '฿' + value
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.6)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: 'rgba(255, 255, 255, 0.8)',
+                font: {
+                  family: 'Sarabun, sans-serif'
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  return ` ${context.dataset.label}: ฿${parseFloat(context.raw).toFixed(2)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    };
+
     // Watchers
     watch(() => daysRemainingInfo.value.targetDateStr, (newVal) => {
       allowanceTargetInputDate.value = newVal;
@@ -1353,8 +1487,13 @@ export default {
       fetchData();
     });
 
-    onMounted(() => {
-      fetchData();
+    watch(allTransactions, () => {
+      nextTick(updateDailyChart);
+    }, { deep: true });
+
+    onMounted(async () => {
+      await fetchData();
+      nextTick(updateDailyChart);
     });
 
     return {
@@ -1373,6 +1512,9 @@ export default {
       adjustBudgetAmount,
       incomeCategories,
       dailyForm,
+      dailyChartCanvas,
+      hasNoExpensesThisMonth,
+      updateDailyChart,
       daysRemainingInfo,
       freeSpendPocket,
       spentToday,
