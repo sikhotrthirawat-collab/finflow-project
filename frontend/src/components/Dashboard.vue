@@ -1441,7 +1441,7 @@ export default {
           maintainAspectRatio: false,
           layout: {
             padding: {
-              left: 45,
+              left: 70,
               right: 15,
               top: 15,
               bottom: 5
@@ -1454,7 +1454,7 @@ export default {
                 color: 'rgba(255, 255, 255, 0.05)'
               },
               ticks: {
-                color: 'rgba(255, 255, 255, 0.85)',
+                color: '#ffffff',
                 font: {
                   family: 'Sarabun, sans-serif',
                   size: 10
