@@ -1441,9 +1441,9 @@ export default {
           maintainAspectRatio: false,
           layout: {
             padding: {
-              left: 10,
-              right: 10,
-              top: 10,
+              left: 45,
+              right: 15,
+              top: 15,
               bottom: 5
             }
           },
