@@ -1403,6 +1403,8 @@ export default {
         return amount > allowanceTarget ? '#ef4444' : '#3b82f6';
       });
 
+      const maxVal = Math.max(500, allowanceTarget * 1.3, ...dailyTotals);
+
       if (dailyChartInstance) {
         dailyChartInstance.destroy();
       }
@@ -1450,19 +1452,26 @@ export default {
           scales: {
             y: {
               beginAtZero: true,
-              suggestedMax: 500,
+              max: maxVal,
               grid: {
                 color: 'rgba(255, 255, 255, 0.05)'
               },
               ticks: {
                 color: '#ffffff',
-                autoSkip: false,
-                maxTicksLimit: 6,
+                maxTicksLimit: 5,
                 font: {
                   family: 'Sarabun, sans-serif',
                   size: 10
-                },
-                callback: value => '฿' + value
+                }
+              },
+              title: {
+                display: true,
+                text: 'จำนวนเงิน (บาท)',
+                color: 'rgba(255, 255, 255, 0.7)',
+                font: {
+                  family: 'Sarabun, sans-serif',
+                  size: 9
+                }
               }
             },
             x: {
