@@ -283,7 +283,7 @@
 
     <!-- Daily Spending Trend Chart (สถิติการใช้จ่ายรายวัน) -->
     <div class="glass-card" style="border-radius: 24px; padding: 1.5rem; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--shadow-md); margin-top: 2rem; margin-bottom: 2rem;">
-      <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+      <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
         <span style="display: flex; align-items: center; gap: 6px;">
           <span>📈</span> สถิติการใช้จ่ายรายวันของเดือนนี้ (Daily Spending Chart)
         </span>
@@ -292,11 +292,13 @@
         </span>
       </h4>
 
-      <div style="height: 280px; position: relative; margin-top: 1rem;">
-        <canvas ref="dailyChartCanvas"></canvas>
-        <div v-if="hasNoExpensesThisMonth" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
-          <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
-          ไม่มีข้อมูลรายจ่ายการกินใช้ในเดือนนี้เพื่อวาดกราฟ
+      <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem;">
+        <div :style="{ height: '280px', minWidth: hasNoExpensesThisMonth ? '100%' : '650px', position: 'relative' }">
+          <canvas ref="dailyChartCanvas"></canvas>
+          <div v-if="hasNoExpensesThisMonth" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+            <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
+            ไม่มีข้อมูลรายจ่ายการกินใช้ในเดือนนี้เพื่อวาดกราฟ
+          </div>
         </div>
       </div>
     </div>
