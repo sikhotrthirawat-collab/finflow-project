@@ -281,23 +281,83 @@
       </div>
     </div>
 
-    <!-- Daily Spending Trend Chart (สถิติการใช้จ่ายรายวัน) -->
+    <!-- Daily Spending Trend Chart (สถิติการใช้จ่ายรายวัน - Pure HTML/CSS Version) -->
     <div class="glass-card" style="border-radius: 24px; padding: 1.5rem; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--shadow-md); margin-top: 2rem; margin-bottom: 2rem;">
-      <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+      <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
         <span style="display: flex; align-items: center; gap: 6px;">
           <span>📈</span> สถิติการใช้จ่ายรายวันของเดือนนี้ (Daily Spending Chart)
         </span>
         <span style="font-size: 0.75rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 20px;">
-          เทียบกับงบแนะนำรายวัน
+          หน่วย: บาท (฿)
         </span>
       </h4>
 
-      <div style="width: 100%; margin-top: 1rem;">
-        <div style="height: 280px; width: 100%; position: relative;">
-          <canvas ref="dailyChartCanvas"></canvas>
-          <div v-if="hasNoExpensesThisMonth" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
-            <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
-            ไม่มีข้อมูลรายจ่ายการกินใช้ในเดือนนี้เพื่อวาดกราฟ
+      <div v-if="hasNoExpensesThisMonth" style="height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+        <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
+        ไม่มีข้อมูลรายจ่ายการกินใช้ในเดือนนี้เพื่อวาดกราฟ
+      </div>
+
+      <div v-else style="display: flex; height: 260px; margin-top: 1rem; position: relative;">
+        <!-- Y-Axis Labels -->
+        <div style="display: flex; flex-direction: column; justify-content: space-between; width: 65px; text-align: right; padding-right: 10px; font-size: 0.725rem; color: rgba(255,255,255,0.6); font-family: monospace; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.08); padding-bottom: 20px;">
+          <div v-for="(tick, idx) in yAxisTicks" :key="idx">
+            ฿{{ Math.round(tick).toLocaleString('th-TH') }}
+          </div>
+        </div>
+
+        <!-- Chart Grid & Bars Area -->
+        <div style="flex: 1; position: relative; height: 240px; margin-left: 10px; display: flex; align-items: flex-end; justify-content: space-between;">
+          <!-- Horizontal Grid Lines -->
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
+            <div style="height: 25%; border-bottom: 1px dashed rgba(255,255,255,0.04);"></div>
+            <div style="height: 25%; border-bottom: 1px dashed rgba(255,255,255,0.04);"></div>
+            <div style="height: 25%; border-bottom: 1px dashed rgba(255,255,255,0.04);"></div>
+            <div style="height: 25%; border-bottom: 1px solid rgba(255,255,255,0.1);"></div>
+          </div>
+
+          <!-- Allowance Limit Guideline (เส้นงบรายวันแนะนำ) -->
+          <div 
+            :style="{ bottom: allowanceLineHeightPercent + '%' }"
+            style="position: absolute; left: 0; width: 100%; border-top: 2px dashed #10b981; z-index: 2; pointer-events: none; transition: bottom 0.3s ease;"
+          >
+            <span style="position: absolute; right: 8px; top: -14px; background: rgba(16,185,129,0.95); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+              เป้าแนะนำ: ฿{{ formatNumber(dailyAllowanceTarget) }}
+            </span>
+          </div>
+
+          <!-- Vertical Bars -->
+          <div 
+            v-for="bar in dailyChartData" 
+            :key="bar.day" 
+            style="flex: 1; margin: 0 1px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; z-index: 3;"
+          >
+            <!-- Bar Shape -->
+            <div 
+              :style="{ 
+                height: bar.heightPercent + '%', 
+                backgroundColor: bar.color,
+                border: '1px solid ' + bar.borderColor,
+                boxShadow: bar.isOver ? '0 0 8px rgba(239, 68, 68, 0.25)' : 'none'
+              }" 
+              style="width: 100%; border-radius: 4px 4px 0 0; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative;"
+              class="daily-bar"
+            >
+              <!-- Tooltip on Hover (CSS based) -->
+              <div class="daily-bar-tooltip" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px); background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s, transform 0.2s; box-shadow: var(--shadow-md); z-index: 10;">
+                วันที่ {{ bar.day }}: ฿{{ formatNumber(bar.amount) }}
+              </div>
+            </div>
+
+            <!-- X-Axis Day Labels below the chart (only show every 3rd or 5th label on mobile) -->
+            <div 
+              style="position: absolute; top: 100%; margin-top: 6px; font-size: 0.65rem; font-weight: 700; font-family: monospace;"
+              :style="{ 
+                color: bar.day === new Date().getDate() && daysRemainingInfo.isCurrentMonth ? 'var(--color-primary)' : 'rgba(255,255,255,0.4)'
+              }"
+              :class="{ 'mobile-hide-label': bar.day % 3 !== 1 }"
+            >
+              {{ bar.day }}
+            </div>
           </div>
         </div>
       </div>
@@ -610,7 +670,6 @@
 <script>
 // Trigger redeploy for Vercel public status
 import { ref, watch, onMounted, computed, nextTick } from 'vue';
-import Chart from 'chart.js/auto';
 
 export default {
   name: 'Dashboard',
@@ -1063,7 +1122,6 @@ export default {
         if (resTx.ok) {
           allTransactions.value = await resTx.json();
           recentTransactions.value = allTransactions.value.slice(0, 5); // display only top 5 recent
-          nextTick(updateDailyChart);
         }
         // Set default date if empty
         if (!dailyForm.value.date) {
@@ -1366,147 +1424,65 @@ export default {
       // Direct redirect logic
     };
 
-    // Daily Spending Chart variables and rendering
-    const dailyChartCanvas = ref(null);
-    let dailyChartInstance = null;
-
-    const hasNoExpensesThisMonth = computed(() => {
-      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
-      return dailyExpenses.length === 0;
-    });
-
-    const updateDailyChart = () => {
-      if (!dailyChartCanvas.value) return;
-
+    // Daily Spending Chart computed properties
+    const dailyChartMaxVal = computed(() => {
       const totalDays = daysRemainingInfo.value.totalDays || 30;
       const dailyTotals = Array(totalDays).fill(0);
-      
       const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
       dailyExpenses.forEach(tx => {
         const txDate = new Date(tx.date);
-        const day = txDate.getDate(); // 1-indexed
+        const day = txDate.getDate();
+        if (day >= 1 && day <= totalDays) {
+          dailyTotals[day - 1] += parseFloat(tx.amount);
+        }
+      });
+      return Math.max(500, dailyAllowanceTarget.value * 1.3, ...dailyTotals);
+    });
+
+    const dailyChartData = computed(() => {
+      const totalDays = daysRemainingInfo.value.totalDays || 30;
+      const dailyTotals = Array(totalDays).fill(0);
+      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
+      dailyExpenses.forEach(tx => {
+        const txDate = new Date(tx.date);
+        const day = txDate.getDate();
         if (day >= 1 && day <= totalDays) {
           dailyTotals[day - 1] += parseFloat(tx.amount);
         }
       });
 
+      const maxVal = dailyChartMaxVal.value;
       const allowanceTarget = dailyAllowanceTarget.value;
-      const limitData = Array(totalDays).fill(allowanceTarget);
 
-      const backgroundColors = dailyTotals.map(amount => {
-        return amount > allowanceTarget 
-          ? 'rgba(239, 68, 68, 0.7)' // Red warning for exceeding target
-          : 'rgba(59, 130, 246, 0.6)'; // Blue for below target
+      return dailyTotals.map((amount, idx) => {
+        const dayNum = idx + 1;
+        const heightPercent = maxVal > 0 ? (amount / maxVal) * 100 : 0;
+        const isOver = amount > allowanceTarget;
+        return {
+          day: dayNum,
+          amount: amount,
+          heightPercent: Math.min(100, heightPercent),
+          isOver: isOver,
+          color: isOver ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)',
+          borderColor: isOver ? '#ef4444' : '#3b82f6'
+        };
       });
+    });
 
-      const borderColors = dailyTotals.map(amount => {
-        return amount > allowanceTarget ? '#ef4444' : '#3b82f6';
-      });
+    const yAxisTicks = computed(() => {
+      const max = dailyChartMaxVal.value;
+      return [max, max * 0.75, max * 0.5, max * 0.25, 0];
+    });
 
-      const maxVal = Math.max(500, allowanceTarget * 1.3, ...dailyTotals);
+    const allowanceLineHeightPercent = computed(() => {
+      const max = dailyChartMaxVal.value;
+      return max > 0 ? (dailyAllowanceTarget.value / max) * 100 : 0;
+    });
 
-      if (dailyChartInstance) {
-        dailyChartInstance.destroy();
-      }
-
-      if (hasNoExpensesThisMonth.value) {
-        return;
-      }
-
-      dailyChartInstance = new Chart(dailyChartCanvas.value, {
-        type: 'bar',
-        data: {
-          labels: Array.from({ length: totalDays }, (_, i) => String(i + 1)),
-          datasets: [
-            {
-              label: 'งบแนะนำรายวัน (฿)',
-              type: 'line',
-              data: limitData,
-              borderColor: '#10b981',
-              borderWidth: 2,
-              borderDash: [6, 6],
-              pointRadius: 0,
-              fill: false
-            },
-            {
-              label: 'ยอดใช้จ่ายจริง (฿)',
-              data: dailyTotals,
-              backgroundColor: backgroundColors,
-              borderColor: borderColors,
-              borderWidth: 1,
-              borderRadius: 8
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: {
-            padding: {
-              left: 70,
-              right: 15,
-              top: 15,
-              bottom: 5
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: maxVal,
-              grid: {
-                color: 'rgba(255, 255, 255, 0.05)'
-              },
-              ticks: {
-                color: '#ffffff',
-                maxTicksLimit: 5,
-                font: {
-                  family: 'Sarabun, sans-serif',
-                  size: 10
-                }
-              },
-              title: {
-                display: true,
-                text: 'จำนวนเงิน (บาท)',
-                color: 'rgba(255, 255, 255, 0.7)',
-                font: {
-                  family: 'Sarabun, sans-serif',
-                  size: 9
-                }
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: 'rgba(255, 255, 255, 0.85)',
-                font: {
-                  family: 'Sarabun, sans-serif',
-                  size: 9
-                }
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: 'rgba(255, 255, 255, 0.8)',
-                font: {
-                  family: 'Sarabun, sans-serif'
-                }
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  return ` ${context.dataset.label}: ฿${parseFloat(context.raw).toFixed(2)}`;
-                }
-              }
-            }
-          }
-        }
-      });
-    };
+    const hasNoExpensesThisMonth = computed(() => {
+      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
+      return dailyExpenses.length === 0;
+    });
 
     // Watchers
     watch(() => daysRemainingInfo.value.targetDateStr, (newVal) => {
@@ -1517,13 +1493,8 @@ export default {
       fetchData();
     });
 
-    watch(allTransactions, () => {
-      nextTick(updateDailyChart);
-    }, { deep: true });
-
     onMounted(async () => {
       await fetchData();
-      nextTick(updateDailyChart);
     });
 
     return {
@@ -1542,9 +1513,10 @@ export default {
       adjustBudgetAmount,
       incomeCategories,
       dailyForm,
-      dailyChartCanvas,
+      dailyChartData,
+      yAxisTicks,
+      allowanceLineHeightPercent,
       hasNoExpensesThisMonth,
-      updateDailyChart,
       daysRemainingInfo,
       freeSpendPocket,
       spentToday,
@@ -1588,3 +1560,18 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.daily-bar {
+  position: relative;
+}
+.daily-bar:hover .daily-bar-tooltip {
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(-10px) !important;
+}
+@media (max-width: 500px) {
+  .mobile-hide-label {
+    display: none !important;
+  }
+}
+</style>
