@@ -551,14 +551,21 @@ export default {
       nextTick(updateChart);
     }, { deep: true });
 
+    watch(categories, () => {
+      nextTick(updateChart);
+    }, { deep: true });
+
     // Handle resetting category when form type changes
     watch(() => form.value.type, () => {
       form.value.category = '';
     });
 
-    onMounted(() => {
-      fetchCategories();
-      fetchTransactions();
+    onMounted(async () => {
+      try {
+        await Promise.all([fetchCategories(), fetchTransactions()]);
+      } catch (err) {
+        console.error('Error on mounted loading:', err);
+      }
     });
 
     return {
