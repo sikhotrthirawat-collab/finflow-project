@@ -440,7 +440,6 @@ export default {
     const showDcaSchedule = ref(false);
 
     const dcaSchedule = [
-    const dcaSchedule = [
       { month: 1, name: 'January', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
       { month: 2, name: 'February', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67, amount: 1000 },
       { month: 3, name: 'March', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
