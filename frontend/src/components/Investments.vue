@@ -279,13 +279,14 @@
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
               <div>
                 <div style="font-family: var(--font-display); font-weight: 850; font-size: 1.4rem; color: var(--text-primary); line-height: 1.1;">
-                  {{ currentDcaTarget?.symbol }}
+                <div style="font-family: var(--font-display); font-weight: 850; font-size: 1.4rem; color: var(--text-primary); line-height: 1.1;">
+                  {{ currentDcaTarget?.symbol }} <span v-if="currentDcaTarget?.amount" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-left: 4px;">(฿{{ currentDcaTarget.amount.toLocaleString('th-TH') }})</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">
                   {{ currentDcaTarget?.desc }}
                 </div>
               </div>
-              <button @click="autoFillDca(currentDcaTarget?.symbol)" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; border-radius: 8px; display: flex; align-items: center; gap: 4px; background: #1877f2; border: none; box-shadow: 0 2px 8px rgba(24, 119, 242, 0.2);">
+              <button @click="autoFillDca(currentDcaTarget?.symbol, currentDcaTarget?.amount)" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; border-radius: 8px; display: flex; align-items: center; gap: 4px; background: #1877f2; border: none; box-shadow: 0 2px 8px rgba(24, 119, 242, 0.2);">
                 ⚡ กรอกข้อมูลซื้อทันที
               </button>
             </div>
@@ -440,18 +441,19 @@ export default {
     const showDcaSchedule = ref(false);
 
     const dcaSchedule = [
-      { month: 1, name: 'January', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
-      { month: 2, name: 'February', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67 },
-      { month: 3, name: 'March', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
-      { month: 4, name: 'April', symbol: 'ASML', desc: 'ASML Holding', targetPercent: 16.67 },
-      { month: 5, name: 'May', symbol: 'VT', desc: 'Vanguard Total World Stock ETF', targetPercent: 16.67 },
-      { month: 6, name: 'June', symbol: 'AMZN', desc: 'Amazon.com Inc', targetPercent: 8.33 },
-      { month: 7, name: 'July', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
-      { month: 8, name: 'August', symbol: 'V', desc: 'Visa Inc', targetPercent: 8.33 },
-      { month: 9, name: 'September', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 33.33 },
-      { month: 10, name: 'October', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67 },
-      { month: 11, name: 'November', symbol: 'ASML', desc: 'ASML Holding', targetPercent: 16.67 },
-      { month: 12, name: 'December', symbol: 'VT', desc: 'Vanguard Total World Stock ETF', targetPercent: 16.67 }
+    const dcaSchedule = [
+      { month: 1, name: 'January', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
+      { month: 2, name: 'February', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67, amount: 1000 },
+      { month: 3, name: 'March', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
+      { month: 4, name: 'April', symbol: 'V', desc: 'Visa Inc', targetPercent: 16.67, amount: 1000 },
+      { month: 5, name: 'May', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
+      { month: 6, name: 'June', symbol: 'ASML', desc: 'ASML Holding', targetPercent: 8.33, amount: 1000 },
+      { month: 7, name: 'July', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
+      { month: 8, name: 'August', symbol: 'MSFT', desc: 'Microsoft Corp', targetPercent: 16.67, amount: 1000 },
+      { month: 9, name: 'September', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
+      { month: 10, name: 'October', symbol: 'AMZN', desc: 'Amazon.com Inc', targetPercent: 8.33, amount: 1000 },
+      { month: 11, name: 'November', symbol: 'VOO', desc: 'S&P 500 ETF', targetPercent: 50.00, amount: 1000 },
+      { month: 12, name: 'December', symbol: 'V', desc: 'Visa Inc', targetPercent: 16.67, amount: 1000 }
     ];
 
     const selectedMonthIndex = computed(() => {
@@ -475,12 +477,11 @@ export default {
       };
 
       const list = [
-        { symbol: 'VOO', name: 'S&P 500 ETF', target: 33.33, actual: 0, actualCost: getActualCost(['VOO']) },
+        { symbol: 'VOO', name: 'S&P 500 ETF', target: 50.00, actual: 0, actualCost: getActualCost(['VOO']) },
         { symbol: 'MSFT', name: 'Microsoft', target: 16.67, actual: 0, actualCost: getActualCost(['MSFT', 'MICROSOFT']) },
-        { symbol: 'ASML', name: 'ASML Holding', target: 16.67, actual: 0, actualCost: getActualCost(['ASML']) },
-        { symbol: 'VT', name: 'Vanguard Total World', target: 16.67, actual: 0, actualCost: getActualCost(['VT']) },
-        { symbol: 'AMZN', name: 'Amazon', target: 8.33, actual: 0, actualCost: getActualCost(['AMZN', 'AMAZON']) },
-        { symbol: 'V', name: 'Visa', target: 8.33, actual: 0, actualCost: getActualCost(['V', 'VISA']) }
+        { symbol: 'V', name: 'Visa', target: 16.67, actual: 0, actualCost: getActualCost(['V', 'VISA']) },
+        { symbol: 'ASML', name: 'ASML Holding', target: 8.33, actual: 0, actualCost: getActualCost(['ASML']) },
+        { symbol: 'AMZN', name: 'Amazon', target: 8.33, actual: 0, actualCost: getActualCost(['AMZN', 'AMAZON']) }
       ];
 
       if (total > 0) {
@@ -492,9 +493,10 @@ export default {
       return list;
     });
 
-    const autoFillDca = (symbol) => {
+    const autoFillDca = (symbol, amount) => {
       form.value.symbol = symbol;
       form.value.currency = 'USD';
+      form.value.amountToSpend = amount || '';
       activeFormTab.value = 'stock';
     };
     
