@@ -279,8 +279,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
               <div>
                 <div style="font-family: var(--font-display); font-weight: 850; font-size: 1.4rem; color: var(--text-primary); line-height: 1.1;">
-                <div style="font-family: var(--font-display); font-weight: 850; font-size: 1.4rem; color: var(--text-primary); line-height: 1.1;">
-                  {{ currentDcaTarget?.symbol }} <span v-if="currentDcaTarget?.amount" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-left: 4px;">(฿{{ currentDcaTarget.amount.toLocaleString('th-TH') }})</span>
+                  {{ currentDcaTarget?.symbol }} <span v-if="currentDcaTarget?.amount" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-left: 4px;">(฿{{ currentDcaTarget?.amount?.toLocaleString('th-TH') }})</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px;">
                   {{ currentDcaTarget?.desc }}
