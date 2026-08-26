@@ -36,6 +36,7 @@ services:
     build: ./backend
     container_name: finance_backend
     restart: always
+    command: npm run dev
     ports:
       - "3000:3000"
     environment:
@@ -57,6 +58,7 @@ services:
     build: ./frontend
     container_name: finance_frontend
     restart: always
+    command: npm run dev
     ports:
       - "5173:5173"
     volumes:

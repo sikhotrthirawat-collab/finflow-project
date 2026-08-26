@@ -478,6 +478,57 @@ app.get('/api/summary', async (req, res) => {
 // -------------------------------------------------------------
 async function initTables() {
   try {
+    // 0. Create base tables if they don't exist
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS categories (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(50) NOT NULL,
+          type ENUM('income', 'expense') NOT NULL,
+          color VARCHAR(7) NOT NULL,
+          icon VARCHAR(30) NOT NULL,
+          UNIQUE KEY name_type (name, type)
+      )
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS transactions (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          date DATE NOT NULL,
+          type ENUM('income', 'expense') NOT NULL,
+          category VARCHAR(50) NOT NULL,
+          amount DECIMAL(10, 2) NOT NULL,
+          description VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS budgets (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          category VARCHAR(50) NOT NULL,
+          amount DECIMAL(10, 2) NOT NULL,
+          month VARCHAR(7) NOT NULL,
+          UNIQUE KEY category_month (category, month)
+      )
+    `);
+
+    // Seed default categories
+    await db.query(`
+      INSERT IGNORE INTO categories (name, type, color, icon) VALUES 
+      ('เงินเดือน', 'income', '#10B981', 'salary'),
+      ('ฟรีแลนซ์/งานเสริม', 'income', '#3B82F6', 'freelance'),
+      ('การลงทุน/ปันผล', 'income', '#8B5CF6', 'investment'),
+      ('อื่นๆ (รายรับ)', 'income', '#6B7280', 'other-income'),
+      ('อาหารและเครื่องดื่ม', 'expense', '#EF4444', 'food'),
+      ('เดินทาง/น้ำมัน', 'expense', '#F59E0B', 'transport'),
+      ('ช้อปปิ้ง', 'expense', '#EC4899', 'shopping'),
+      ('ที่อยู่อาศัย/ค่าเช่า', 'expense', '#3B82F6', 'housing'),
+      ('สาธารณูปโภค (น้ำ/ไฟ/เน็ต)', 'expense', '#06B6D4', 'utilities'),
+      ('สุขภาพและยารักษาโรค', 'expense', '#14B8A6', 'health'),
+      ('ความบันเทิง/พักผ่อน', 'expense', '#8B5CF6', 'entertainment'),
+      ('อื่นๆ (รายจ่าย)', 'expense', '#6B7280', 'other-expense')
+    `);
+
     // 1. Create users table
     await db.query(`
       CREATE TABLE IF NOT EXISTS users (

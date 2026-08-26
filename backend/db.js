@@ -1,12 +1,12 @@
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'db',
-  user: process.env.DB_USER || 'finance_user',
-  password: process.env.DB_PASSWORD || 'finance_pass_123',
-  database: process.env.DB_DATABASE || 'finance_db',
-  port: parseInt(process.env.DB_PORT || '3306'),
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  host: process.env.DB_HOST || process.env.MYSQLHOST || 'db',
+  user: process.env.DB_USER || process.env.MYSQLUSER || 'finance_user',
+  password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || 'finance_pass_123',
+  database: process.env.DB_DATABASE || process.env.MYSQLDATABASE || 'finance_db',
+  port: parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306'),
+  ssl: (process.env.DB_SSL === 'true' || !!process.env.MYSQL_URL) ? { rejectUnauthorized: false } : undefined,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
