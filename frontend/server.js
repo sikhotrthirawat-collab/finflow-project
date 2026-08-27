@@ -8,7 +8,10 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5173;
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+let BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+if (BACKEND_URL && !BACKEND_URL.startsWith('http://') && !BACKEND_URL.startsWith('https://')) {
+  BACKEND_URL = 'https://' + BACKEND_URL;
+}
 
 // Proxy API requests to backend
 app.use('/api', createProxyMiddleware({
