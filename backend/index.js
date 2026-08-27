@@ -8,6 +8,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+app.get('/api/version', (req, res) => {
+  res.json({ version: '1.0.3', date: '2026-08-27T15:56:00' });
+});
+
 // Log requests
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
