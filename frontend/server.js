@@ -13,11 +13,12 @@ if (BACKEND_URL && !BACKEND_URL.startsWith('http://') && !BACKEND_URL.startsWith
   BACKEND_URL = 'https://' + BACKEND_URL;
 }
 
-// Proxy API requests to backend
-app.use('/api', createProxyMiddleware({
+// Proxy API requests to backend (preserve /api prefix using pathFilter)
+app.use(createProxyMiddleware({
   target: BACKEND_URL,
   changeOrigin: true,
-  logger: console // v3 use logger instead of logLevel
+  pathFilter: '/api',
+  logger: console
 }));
 
 // Serve static files from dist/
