@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap');
+
 :root {
   --bg-primary: #0b0f19;
   --bg-secondary: #131a2e;
@@ -963,4 +965,182 @@ body.light-theme select option {
     border-radius: 12px;
   }
 }
+
+/* ==========================================
+   🎮 ROV GAME LOBBY THEME OVERRIDES ⚔️
+   ========================================== */
+
+:root {
+  --bg-primary: #060a12 !important;
+  --bg-secondary: #0d1420 !important;
+  --bg-card: rgba(13, 22, 36, 0.85) !important;
+  --border-color: rgba(197, 168, 128, 0.35) !important;
+  --border-focus: #ffd700 !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #c5a880 !important;
+  --color-primary: #ffd700 !important;
+  --font-display: 'Cinzel', 'Noto Sans Thai', serif !important;
+  --radius-sm: 3px !important;
+  --radius-md: 4px !important;
+  --radius-lg: 6px !important;
+  --radius-xl: 8px !important;
+  --shadow-glow: 0 0 15px rgba(255, 215, 0, 0.3) !important;
+}
+
+body {
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(197, 168, 128, 0.05) 0%, transparent 40%) !important;
+}
+
+/* Sidebar ROV Theme styling */
+.sidebar {
+  background: linear-gradient(180deg, rgba(13, 20, 32, 0.95) 0%, rgba(6, 10, 18, 0.98) 100%) !important;
+  border-right: 2px solid rgba(197, 168, 128, 0.4) !important;
+  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+.brand-icon {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)) !important;
+}
+
+.brand-name {
+  background: linear-gradient(135deg, #ffd700 0%, #c5a880 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2) !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.5px !important;
+}
+
+/* Nav Item active state */
+.nav-item.active button {
+  background: linear-gradient(90deg, rgba(197, 168, 128, 0.22) 0%, rgba(197, 168, 128, 0.04) 100%) !important;
+  border: 1px solid rgba(255, 215, 0, 0.5) !important;
+  border-left: 4px solid #ffd700 !important;
+  color: #ffd700 !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4) !important;
+}
+
+.nav-item button {
+  font-family: 'Cinzel', 'Noto Sans Thai', sans-serif !important;
+  font-weight: bold !important;
+  border-radius: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.nav-item button:hover {
+  background: rgba(197, 168, 128, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* Glass Card styling - ROV interface container */
+.glass-card, .widget, .stats-card, .pocket-card {
+  border: 1px solid rgba(197, 168, 128, 0.4) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(197, 168, 128, 0.05) !important;
+  border-radius: 4px !important;
+  position: relative !important;
+}
+
+.glass-card::before, .widget::before, .stats-card::before, .pocket-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 215, 0, 0.06);
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+/* Page title */
+.page-title h1 {
+  font-family: 'Cinzel', 'Noto Sans Thai', serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.5px !important;
+  background: linear-gradient(180deg, #ffffff 30%, #c5a880 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 10px rgba(197, 168, 128, 0.3) !important;
+}
+
+/* Buttons in ROV Style */
+button.btn-primary, button.action-btn, button[type="submit"], .btn-fb-blue {
+  background: linear-gradient(180deg, #c5a880 0%, #9e7f55 100%) !important;
+  border: 1px solid #ffd700 !important;
+  border-radius: 3px !important;
+  color: #0c121e !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  font-family: 'Cinzel', 'Noto Sans Thai', sans-serif !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
+  text-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+button.btn-primary:hover, button.action-btn:hover, button[type="submit"]:hover {
+  background: linear-gradient(180deg, #ffd700 0%, #c5a880 100%) !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.5) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Progress bar / HP status bar */
+.progress-bar-fill {
+  background: linear-gradient(90deg, #00ff87 0%, #60efff 100%) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 135, 0.6) !important;
+}
+
+/* Inputs and Forms styling */
+input, select, textarea {
+  background-color: rgba(6, 10, 18, 0.9) !important;
+  border: 1px solid rgba(197, 168, 128, 0.4) !important;
+  border-radius: 3px !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.3s ease !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4) !important;
+}
+
+/* Header style styling */
+header {
+  border-bottom: 2px solid rgba(197, 168, 128, 0.2) !important;
+  padding-bottom: 1.5rem !important;
+  margin-bottom: 2rem !important;
+}
+
+/* Table Match History styling */
+table {
+  background: rgba(13, 22, 36, 0.6) !important;
+}
+
+th {
+  background: rgba(197, 168, 128, 0.15) !important;
+  color: #ffd700 !important;
+  font-family: 'Cinzel', 'Noto Sans Thai', sans-serif !important;
+  font-weight: bold !important;
+  border-bottom: 2px solid rgba(197, 168, 128, 0.4) !important;
+}
+
+tr:hover {
+  background: rgba(197, 168, 128, 0.05) !important;
+}
+
+/* Quick Month Picker styling */
+.month-picker select {
+  font-family: 'Cinzel', 'Noto Sans Thai', sans-serif !important;
+  font-weight: bold !important;
+}
+
+/* Bottom Navigation Bar on Mobile */
+.bottom-nav {
+  background: linear-gradient(0deg, rgba(6, 10, 18, 0.98) 0%, rgba(13, 20, 32, 0.95) 100%) !important;
+  border-top: 2px solid rgba(197, 168, 128, 0.4) !important;
+}
+
 

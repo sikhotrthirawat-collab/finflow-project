@@ -31,7 +31,7 @@
               <rect x="14" y="12" width="7" height="9"></rect>
               <rect x="3" y="16" width="7" height="5"></rect>
             </svg>
-            <span class="nav-text">กระเป๋าเงิน (Pockets)</span>
+            <span class="nav-text">คลังไอเทม (Pockets)</span>
           </button>
         </li>
         <li class="nav-item" :class="{ active: currentTab === 'transactions' }">
@@ -40,7 +40,7 @@
               <line x1="12" y1="1" x2="12" y2="23"></line>
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
-            <span class="nav-text">ประวัติรายการ</span>
+            <span class="nav-text">บันทึกการรบ (Transactions)</span>
           </button>
         </li>
         <li class="nav-item" :class="{ active: currentTab === 'investments' }">
@@ -50,7 +50,7 @@
               <line x1="12" y1="20" x2="12" y2="4"></line>
               <line x1="6" y1="20" x2="6" y2="14"></line>
             </svg>
-            <span class="nav-text">การลงทุนหุ้น</span>
+            <span class="nav-text">สถาบันลงทุน (Investments)</span>
           </button>
         </li>
         <li class="nav-item" :class="{ active: currentTab === 'budgets' }">
@@ -60,7 +60,7 @@
               <circle cx="12" cy="12" r="6"></circle>
               <circle cx="12" cy="12" r="2"></circle>
             </svg>
-            <span class="nav-text">ตั้งค่า Pockets</span>
+            <span class="nav-text">ตั้งค่าระบบ (Settings)</span>
           </button>
         </li>
       </ul>
