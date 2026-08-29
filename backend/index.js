@@ -101,7 +101,10 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/user/profile', async (req, res) => {
   try {
     const userId = getUserId(req);
-    const [rows] = await db.query("SELECT id, username, DATE_FORMAT(allowance_target_date, '%Y-%m-%d') AS allowance_target_date FROM users WHERE id = ?", [userId]);
+    const [rows] = await db.query(
+      "SELECT id, username, DATE_FORMAT(allowance_start_date, '%Y-%m-%d') AS allowance_start_date, DATE_FORMAT(allowance_target_date, '%Y-%m-%d') AS allowance_target_date FROM users WHERE id = ?",
+      [userId]
+    );
     if (rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -109,6 +112,7 @@ app.get('/api/user/profile', async (req, res) => {
     res.json({ 
       id: rows[0].id, 
       username: rows[0].username, 
+      allowance_start_date: rows[0].allowance_start_date || null,
       allowance_target_date: rows[0].allowance_target_date || null 
     });
   } catch (err) {
@@ -116,15 +120,21 @@ app.get('/api/user/profile', async (req, res) => {
   }
 });
 
-// Update user profile details (allowance target date)
+// Update user profile details (allowance start/target dates)
 app.post('/api/user/profile', async (req, res) => {
   try {
     const userId = getUserId(req);
-    const { allowance_target_date } = req.body; // Expects YYYY-MM-DD
+    const { allowance_start_date, allowance_target_date } = req.body; // Expects YYYY-MM-DD
     
-    await db.query('UPDATE users SET allowance_target_date = ? WHERE id = ?', [allowance_target_date || null, userId]);
+    if (allowance_start_date !== undefined && allowance_target_date !== undefined) {
+      await db.query('UPDATE users SET allowance_start_date = ?, allowance_target_date = ? WHERE id = ?', [allowance_start_date || null, allowance_target_date || null, userId]);
+    } else if (allowance_start_date !== undefined) {
+      await db.query('UPDATE users SET allowance_start_date = ? WHERE id = ?', [allowance_start_date || null, userId]);
+    } else if (allowance_target_date !== undefined) {
+      await db.query('UPDATE users SET allowance_target_date = ? WHERE id = ?', [allowance_target_date || null, userId]);
+    }
     
-    res.json({ message: 'Profile updated successfully', allowance_target_date });
+    res.json({ message: 'Profile updated successfully', allowance_start_date, allowance_target_date });
   } catch (err) {
     handleError(res, err);
   }
@@ -553,6 +563,13 @@ async function initTables() {
       (1, 'oat', '123'),
       (2, 'beem', '123')
     `);
+
+    try {
+      await db.query(`ALTER TABLE users ADD COLUMN allowance_start_date DATE DEFAULT NULL`);
+      console.log("Column allowance_start_date added to users.");
+    } catch (err) {
+      // ignore
+    }
 
     try {
       await db.query(`ALTER TABLE users ADD COLUMN allowance_target_date DATE DEFAULT NULL`);

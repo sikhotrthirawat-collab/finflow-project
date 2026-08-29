@@ -139,22 +139,49 @@
             </div>
           </div>
 
-          <!-- Target End Date Setting -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 8px 12px; background: rgba(59, 130, 246, 0.04); border-radius: 12px; border: 1px solid var(--border-color); font-size: 0.75rem;">
-            <span style="color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 4px;">
-              <span>📅</span> เฉลี่ยถึงวันที่:
-            </span>
-            <div style="position: relative; display: flex; align-items: center; gap: 4px; cursor: pointer;">
-              <span style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">
-                {{ formatDate(daysRemainingInfo.targetDateStr) }}
+          <!-- Allowance Date Range Setting (Start Date -> End Date) -->
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; padding: 10px 12px; background: rgba(59, 130, 246, 0.04); border-radius: 12px; border: 1px solid var(--border-color); font-size: 0.75rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                <span>📅</span> ช่วงวันที่คิดเฉลี่ย:
               </span>
-              <span style="font-size: 0.7rem; color: var(--text-muted);">✏️</span>
-              <input 
-                type="date" 
-                v-model="allowanceTargetInputDate"
-                @change="updateAllowanceTargetDate" 
-                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
-              />
+              <span style="font-size: 0.7rem; color: var(--text-muted);">
+                (รอบรวม {{ daysRemainingInfo.totalDays }} วัน)
+              </span>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(0,0,0,0.03); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <!-- Start Date Picker -->
+              <div style="position: relative; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                <span style="color: var(--text-muted); font-size: 0.7rem;">เริ่ม:</span>
+                <span style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">
+                  {{ formatDate(daysRemainingInfo.startDateStr) }}
+                </span>
+                <span style="font-size: 0.65rem; color: var(--text-muted);">✏️</span>
+                <input 
+                  type="date" 
+                  v-model="allowanceStartInputDate"
+                  @change="updateAllowanceStartDate" 
+                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
+                />
+              </div>
+
+              <span style="color: var(--text-muted); font-weight: 600;">➔</span>
+
+              <!-- End Date Picker -->
+              <div style="position: relative; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                <span style="color: var(--text-muted); font-size: 0.7rem;">ถึง:</span>
+                <span style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">
+                  {{ formatDate(daysRemainingInfo.targetDateStr) }}
+                </span>
+                <span style="font-size: 0.65rem; color: var(--text-muted);">✏️</span>
+                <input 
+                  type="date" 
+                  v-model="allowanceTargetInputDate"
+                  @change="updateAllowanceTargetDate" 
+                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
+                />
+              </div>
             </div>
           </div>
 
@@ -701,7 +728,8 @@ export default {
     const budgetProgressList = ref([]);
     const categories = ref([]);
 
-    const userProfile = ref({ allowance_target_date: null });
+    const userProfile = ref({ allowance_start_date: null, allowance_target_date: null });
+    const allowanceStartInputDate = ref('');
     const allowanceTargetInputDate = ref('');
 
     const fetchUserProfile = async () => {
@@ -714,6 +742,31 @@ export default {
         }
       } catch (err) {
         console.error('Error fetching user profile:', err);
+      }
+    };
+
+    const updateAllowanceStartDate = async (e) => {
+      const newDate = e.target.value;
+      if (!newDate) return;
+      
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': String(getUserId())
+          },
+          body: JSON.stringify({
+            allowance_start_date: newDate
+          })
+        });
+        
+        if (res.ok) {
+          userProfile.value.allowance_start_date = newDate;
+          fetchData();
+        }
+      } catch (err) {
+        console.error('Error updating allowance start date:', err);
       }
     };
 
@@ -932,13 +985,38 @@ export default {
       return `${yearCE}-${month}-${day}`;
     };
 
-    // Days remaining calculations (Until the user's custom date or end of the next month)
+    // Days remaining calculations (Between start date and target end date)
     const daysRemainingInfo = computed(() => {
       const today = new Date();
       const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       const oneDayMs = 24 * 60 * 60 * 1000;
 
-      // Determine the target date
+      // Determine default month context
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1;
+      const currentMonthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+      const isCurrentMonth = (props.month === currentMonthStr);
+
+      // Determine start date
+      let startDateObj;
+      if (userProfile.value && userProfile.value.allowance_start_date) {
+        try {
+          const parts = userProfile.value.allowance_start_date.split('-');
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          startDateObj = new Date(y, m, d);
+          if (isNaN(startDateObj.getTime())) throw new Error('Invalid Date');
+        } catch (e) {
+          const monthParts = props.month.split('-');
+          startDateObj = new Date(monthParts[0], parseInt(monthParts[1], 10) - 1, 1);
+        }
+      } else {
+        const monthParts = props.month.split('-');
+        startDateObj = new Date(monthParts[0], parseInt(monthParts[1], 10) - 1, 1);
+      }
+
+      // Determine target end date
       let targetDateObj;
       if (userProfile.value && userProfile.value.allowance_target_date) {
         try {
@@ -947,46 +1025,50 @@ export default {
           const m = parseInt(parts[1], 10) - 1;
           const d = parseInt(parts[2], 10);
           targetDateObj = new Date(y, m, d);
-          if (isNaN(targetDateObj.getTime())) {
-            throw new Error('Invalid Date');
-          }
+          if (isNaN(targetDateObj.getTime())) throw new Error('Invalid Date');
         } catch (e) {
-          targetDateObj = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+          const monthParts = props.month.split('-');
+          targetDateObj = new Date(monthParts[0], parseInt(monthParts[1], 10), 0);
         }
       } else {
-        // Fallback to default: end of next month
-        targetDateObj = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+        const monthParts = props.month.split('-');
+        targetDateObj = new Date(monthParts[0], parseInt(monthParts[1], 10), 0);
       }
 
-      const diffMs = targetDateObj.getTime() - todayMidnight.getTime();
-      // Ensure remainingDays is at least 1 to avoid division by zero or negative days
-      const remainingDays = Math.max(1, Math.round(diffMs / oneDayMs) + 1);
-      
-      const yearStr = targetDateObj.getFullYear();
-      const monthStr = String(targetDateObj.getMonth() + 1).padStart(2, '0');
-      const dayStr = String(targetDateObj.getDate()).padStart(2, '0');
-      const targetDateStr = `${yearStr}-${monthStr}-${dayStr}`;
+      // Format ISO date strings (YYYY-MM-DD)
+      const formatIso = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
 
-      const year = today.getFullYear();
-      const month = today.getMonth() + 1;
-      const currentMonthStr = `${year}-${String(month).padStart(2, '0')}`;
+      const startDateStr = formatIso(startDateObj);
+      const targetDateStr = formatIso(targetDateObj);
 
-      if (props.month !== currentMonthStr) {
-        const parts = props.month.split('-');
-        const totalDaysInSelected = new Date(parts[0], parts[1], 0).getDate();
-        return {
-          totalDays: totalDaysInSelected,
-          remainingDays: totalDaysInSelected,
-          isCurrentMonth: false,
-          targetDateStr
-        };
+      // Total days in the cycle
+      const diffTotalMs = targetDateObj.getTime() - startDateObj.getTime();
+      const totalDays = Math.max(1, Math.round(diffTotalMs / oneDayMs) + 1);
+
+      // Remaining days calculation
+      let remainingDays = totalDays;
+      if (isCurrentMonth) {
+        if (todayMidnight.getTime() <= startDateObj.getTime()) {
+          remainingDays = totalDays;
+        } else if (todayMidnight.getTime() > targetDateObj.getTime()) {
+          remainingDays = 1;
+        } else {
+          const diffRemainingMs = targetDateObj.getTime() - todayMidnight.getTime();
+          remainingDays = Math.max(1, Math.round(diffRemainingMs / oneDayMs) + 1);
+        }
       }
 
       return {
-        totalDays: new Date(year, month, 0).getDate(),
-        remainingDays: remainingDays,
-        isCurrentMonth: true,
-        targetDateStr
+        startDateStr,
+        targetDateStr,
+        totalDays,
+        remainingDays,
+        isCurrentMonth
       };
     });
 
@@ -1507,6 +1589,10 @@ export default {
     });
 
     // Watchers
+    watch(() => daysRemainingInfo.value.startDateStr, (newVal) => {
+      allowanceStartInputDate.value = newVal;
+    }, { immediate: true });
+
     watch(() => daysRemainingInfo.value.targetDateStr, (newVal) => {
       allowanceTargetInputDate.value = newVal;
     }, { immediate: true });
@@ -1573,7 +1659,9 @@ export default {
       getInsightTextColor,
       getInsightIcon,
       userProfile,
+      updateAllowanceStartDate,
       updateAllowanceTargetDate,
+      allowanceStartInputDate,
       allowanceTargetInputDate,
       cashPocket,
       totalAllowancePoolRemaining,
