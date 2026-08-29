@@ -40,7 +40,7 @@
               <line x1="12" y1="1" x2="12" y2="23"></line>
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
-            <span class="nav-text">บันทึกการรบ (Transactions)</span>
+            <span class="nav-text">ประวัติการใช้จ่าย (Transactions)</span>
           </button>
         </li>
         <li class="nav-item" :class="{ active: currentTab === 'investments' }">
