@@ -127,7 +127,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Dashboard from './components/Dashboard.vue';
 import Transactions from './components/Transactions.vue';
 import Budgets from './components/Budgets.vue';
@@ -168,7 +168,16 @@ export default {
     const currentTab = ref('dashboard');
     const today = new Date();
     const defaultMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-    const selectedMonth = ref(defaultMonth); // Automatically defaults to current month
+    
+    // Lock and persist user-selected month in localStorage across page reloads/tab changes
+    const savedMonth = localStorage.getItem('finflow_selected_month');
+    const selectedMonth = ref(savedMonth || defaultMonth);
+
+    watch(selectedMonth, (newMonth) => {
+      if (newMonth) {
+        localStorage.setItem('finflow_selected_month', newMonth);
+      }
+    });
 
     const activeCompRef = ref(null);
 
@@ -192,8 +201,20 @@ export default {
       }
     };
 
-    // List of months for dropdown (from late 2025 to end of 2026)
+    // List of months for dropdown (from 2568 to 2570 / 2025 to 2027)
     const monthOptions = [
+      { value: '2027-12', label: 'ธันวาคม 2570' },
+      { value: '2027-11', label: 'พฤศจิกายน 2570' },
+      { value: '2027-10', label: 'ตุลาคม 2570' },
+      { value: '2027-09', label: 'กันยายน 2570' },
+      { value: '2027-08', label: 'สิงหาคม 2570' },
+      { value: '2027-07', label: 'กรกฎาคม 2570' },
+      { value: '2027-06', label: 'มิถุนายน 2570' },
+      { value: '2027-05', label: 'พฤษภาคม 2570' },
+      { value: '2027-04', label: 'เมษายน 2570' },
+      { value: '2027-03', label: 'มีนาคม 2570' },
+      { value: '2027-02', label: 'กุมภาพันธ์ 2570' },
+      { value: '2027-01', label: 'มกราคม 2570' },
       { value: '2026-12', label: 'ธันวาคม 2569' },
       { value: '2026-11', label: 'พฤศจิกายน 2569' },
       { value: '2026-10', label: 'ตุลาคม 2569' },
@@ -206,7 +227,18 @@ export default {
       { value: '2026-03', label: 'มีนาคม 2569' },
       { value: '2026-02', label: 'กุมภาพันธ์ 2569' },
       { value: '2026-01', label: 'มกราคม 2569' },
-      { value: '2025-12', label: 'ธันวาคม 2568' }
+      { value: '2025-12', label: 'ธันวาคม 2568' },
+      { value: '2025-11', label: 'พฤศจิกายน 2568' },
+      { value: '2025-10', label: 'ตุลาคม 2568' },
+      { value: '2025-09', label: 'กันยายน 2568' },
+      { value: '2025-08', label: 'สิงหาคม 2568' },
+      { value: '2025-07', label: 'กรกฎาคม 2568' },
+      { value: '2025-06', label: 'มิถุนายน 2568' },
+      { value: '2025-05', label: 'พฤษภาคม 2568' },
+      { value: '2025-04', label: 'เมษายน 2568' },
+      { value: '2025-03', label: 'มีนาคม 2568' },
+      { value: '2025-02', label: 'กุมภาพันธ์ 2568' },
+      { value: '2025-01', label: 'มกราคม 2568' }
     ];
 
     const activeComponent = computed(() => {

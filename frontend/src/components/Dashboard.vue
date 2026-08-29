@@ -889,9 +889,21 @@ export default {
       return localTodayStr.startsWith(props.month) ? localTodayStr : `${props.month}-01`;
     };
 
-    // Get today's local date in dd/mm/yy (BE) format
+    // Get today's local date in dd/mm/yy (BE) format matching props.month
     const getTodayDateText = () => {
       const today = new Date();
+      const localTodayStr = today.getFullYear() + '-' + 
+        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(today.getDate()).padStart(2, '0');
+      
+      if (props.month && !localTodayStr.startsWith(props.month)) {
+        const parts = props.month.split('-');
+        const yearCE = parseInt(parts[0]);
+        const m = parts[1];
+        const yearBE = String(yearCE + 543).slice(-2);
+        return `01/${m}/${yearBE}`;
+      }
+
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const year = String(today.getFullYear() + 543).slice(-2);
