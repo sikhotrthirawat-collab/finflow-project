@@ -210,8 +210,9 @@
                     type="date" 
                     @change="e => { 
                       if (e.target.value) { 
-                        const d = new Date(e.target.value); 
-                        dailyForm.date = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear() + 543).slice(-2)}`; 
+                        const [y, m, d] = e.target.value.split('-');
+                        const yearBE = String(parseInt(y) + 543).slice(-2);
+                        dailyForm.date = `${d}/${m}/${yearBE}`;
                       } 
                     }" 
                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
@@ -380,8 +381,9 @@
                 type="date" 
                 @change="e => { 
                   if (e.target.value) { 
-                    const d = new Date(e.target.value); 
-                    incomeForm.dateText = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear() + 543).slice(-2)}`; 
+                    const [y, m, d] = e.target.value.split('-');
+                    const yearBE = String(parseInt(y) + 543).slice(-2);
+                    incomeForm.dateText = `${d}/${m}/${yearBE}`;
                   } 
                 }" 
                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
@@ -429,8 +431,9 @@
                 type="date" 
                 @change="e => { 
                   if (e.target.value) { 
-                    const d = new Date(e.target.value); 
-                    expenseForm.dateText = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear() + 543).slice(-2)}`; 
+                    const [y, m, d] = e.target.value.split('-');
+                    const yearBE = String(parseInt(y) + 543).slice(-2);
+                    expenseForm.dateText = `${d}/${m}/${yearBE}`;
                   } 
                 }" 
                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" 
@@ -913,6 +916,9 @@ export default {
     // Parse dd/mm/yy (BE) text into YYYY-MM-DD (CE) for MySQL
     const parseDateText = (text) => {
       if (!text) return getTodayDateStr();
+      if (text.includes('-') && text.split('-').length === 3) {
+        return text;
+      }
       const parts = text.split('/');
       if (parts.length !== 3) return getTodayDateStr();
       const day = parts[0].trim().padStart(2, '0');
@@ -922,7 +928,7 @@ export default {
       if (yearBE < 100) {
         yearBE += 2500; // 69 -> 2569
       }
-      const yearCE = yearBE - 543;
+      const yearCE = yearBE > 2400 ? yearBE - 543 : yearBE;
       return `${yearCE}-${month}-${day}`;
     };
 
@@ -1244,11 +1250,15 @@ export default {
 
         if (res.ok) {
           closeModals();
-          fetchData();
+          await fetchData();
           emit('update-data');
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          alert(errData.error || 'เกิดข้อผิดพลาดในการบันทึกรายรับ');
         }
       } catch (err) {
         console.error(err);
+        alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
       }
     };
 
@@ -1502,6 +1512,7 @@ export default {
     }, { immediate: true });
 
     watch(() => props.month, () => {
+      dailyForm.value.date = getTodayDateText();
       fetchData();
     });
 

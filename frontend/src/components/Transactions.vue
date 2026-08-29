@@ -305,6 +305,13 @@ export default {
     // Helper to get formatted date string for inputs (e.g. 29/07/69)
     const getFormattedDateText = (dateStr) => {
       if (!dateStr) return '';
+      if (dateStr.includes('-')) {
+        const parts = dateStr.split('T')[0].split('-');
+        if (parts.length === 3) {
+          const yearBE = String(parseInt(parts[0]) + 543).slice(-2);
+          return `${parts[2]}/${parts[1]}/${yearBE}`;
+        }
+      }
       const date = new Date(dateStr);
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -315,6 +322,9 @@ export default {
     // Get standard YYYY-MM-DD format for MySQL from input date text
     const parseDateText = (text) => {
       if (!text) return '';
+      if (text.includes('-') && text.split('-').length === 3) {
+        return text;
+      }
       const parts = text.split('/');
       if (parts.length !== 3) return '';
       const day = parts[0].trim().padStart(2, '0');
@@ -324,7 +334,7 @@ export default {
       if (yearBE < 100) {
         yearBE += 2500;
       }
-      const yearCE = yearBE - 543;
+      const yearCE = yearBE > 2400 ? yearBE - 543 : yearBE;
       return `${yearCE}-${month}-${day}`;
     };
 
