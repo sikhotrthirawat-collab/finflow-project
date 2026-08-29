@@ -378,7 +378,7 @@ export default {
     // Fetch transactions based on month
     const fetchTransactions = async () => {
       try {
-        const res = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`, {
+        const res = await fetch(`/api/transactions?month=${props.month}&t=${Date.now()}`, {
           headers: { 'x-user-id': String(getUserId()) }
         });
         if (res.ok) {

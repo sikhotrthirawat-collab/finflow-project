@@ -1134,7 +1134,7 @@ export default {
         }
 
         // 3. Fetch all monthly transactions to compute daily spend
-        const resTx = await fetch(`/api/transactions?startDate=${props.month}-01&endDate=${props.month}-31&t=${Date.now()}`, {
+        const resTx = await fetch(`/api/transactions?month=${props.month}&t=${Date.now()}`, {
           headers: { 'x-user-id': String(getUserId()) }
         });
         if (resTx.ok) {

@@ -251,17 +251,22 @@ app.put('/api/categories/:id', async (req, res) => {
 app.get('/api/transactions', async (req, res) => {
   try {
     const userId = getUserId(req);
-    const { startDate, endDate, type, category, search } = req.query;
+    const { month, startDate, endDate, type, category, search } = req.query;
     let query = 'SELECT * FROM transactions WHERE user_id = ?';
     const params = [userId];
 
-    if (startDate) {
-      query += ' AND date >= ?';
-      params.push(startDate);
-    }
-    if (endDate) {
-      query += ' AND date <= ?';
-      params.push(endDate);
+    if (month) {
+      query += ' AND date >= ? AND date <= LAST_DAY(?)';
+      params.push(`${month}-01`, `${month}-01`);
+    } else {
+      if (startDate) {
+        query += ' AND date >= ?';
+        params.push(startDate);
+      }
+      if (endDate) {
+        query += ' AND date <= ?';
+        params.push(endDate);
+      }
     }
     if (type) {
       query += ' AND type = ?';
