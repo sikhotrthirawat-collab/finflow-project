@@ -272,8 +272,25 @@
                   ⚡ จ่ายด่วน
                 </button>
               </div>
-              <div style="font-size: 0.725rem; color: var(--text-muted); text-align: center; margin-top: 4px;">
-                *หักจากซอง <b>"เหลือใช้"</b> อัตโนมัติ (คงเหลือสะสม ฿{{ formatNumber(freeSpendPocket?.remaining || 0) }}<span v-if="cashPocket"> + เงินสด ฿{{ formatNumber(cashPocket.remaining) }}</span>)
+
+              <!-- Tomorrow's Incentive / Motivation Allowance Banner -->
+              <div style="font-size: 0.775rem; text-align: center; margin-top: 6px; padding: 8px 12px; border-radius: 12px; transition: all 0.3s ease;"
+                   :style="tomorrowAllowanceInfo.isIncrease 
+                     ? { background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', color: 'var(--color-success)' } 
+                     : { background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--color-danger)' }">
+                <div style="font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
+                  <span>{{ tomorrowAllowanceInfo.isIncrease ? '🔥' : '⚠️' }}</span>
+                  <span v-if="!tomorrowAllowanceInfo.isLastDay">
+                    ถ้าวันนี้ไม่ใช้เพิ่ม พรุ่งนี้จะมีงบใช้ได้: 
+                    <b style="font-family: var(--font-display); font-size: 0.95rem; text-decoration: underline;">฿{{ formatNumber(tomorrowAllowanceInfo.amount) }}</b> / วัน
+                    <span style="font-size: 0.7rem; font-weight: 800; background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 6px;" :style="{ color: tomorrowAllowanceInfo.isIncrease ? 'var(--color-success)' : 'var(--color-danger)' }">
+                      {{ tomorrowAllowanceInfo.isIncrease ? '+' : '-' }}฿{{ formatNumber(tomorrowAllowanceInfo.diff) }}
+                    </span>
+                  </span>
+                  <span v-else>
+                    {{ tomorrowAllowanceInfo.text }}
+                  </span>
+                </div>
               </div>
             </div>
           </form>
@@ -1115,6 +1132,38 @@ export default {
       return remaining > 0 ? remaining : 0;
     });
 
+    // Tomorrow's Incentive / Motivation Allowance Calculation
+    const tomorrowAllowanceInfo = computed(() => {
+      const remainingDays = daysRemainingInfo.value.remainingDays;
+      const currentPool = totalAllowancePoolRemaining.value;
+      const currentTarget = dailyAllowanceTarget.value;
+
+      if (remainingDays <= 1) {
+        return {
+          amount: currentPool,
+          diff: 0,
+          isIncrease: true,
+          isLastDay: true,
+          text: `🎉 วันสุดท้ายของรอบ! เงินที่เหลือ ฿${formatNumber(currentPool)} จะยกไปสะสมรอบถัดไป`
+        };
+      }
+
+      const daysTomorrow = remainingDays - 1;
+      const amount = currentPool > 0 ? (currentPool / daysTomorrow) : 0;
+      const diff = amount - currentTarget;
+      const isIncrease = diff >= 0;
+
+      return {
+        amount,
+        diff: Math.abs(diff),
+        isIncrease,
+        isLastDay: false,
+        text: isIncrease 
+          ? `✨ ถ้าวันนี้ไม่ใช้เพิ่ม พรุ่งนี้จะมีงบกินใช้เพิ่มเป็น ฿${formatNumber(amount)}/วัน (+฿${formatNumber(Math.abs(diff))})`
+          : `⚠️ พรุ่งนี้งบกินใช้จะปรับลดเหลือ ฿${formatNumber(amount)}/วัน (-฿${formatNumber(Math.abs(diff))})`
+      };
+    });
+
     const openAllowanceAnalysisModal = () => {
       isAllowanceAnalysisModalOpen.value = true;
     };
@@ -1455,6 +1504,14 @@ export default {
         message: `📅 เหลือเวลาใช้เงินอีก ${daysRemainingInfo.value.remainingDays} วัน (เฉลี่ยถึงวันที่ ${formatDate(daysRemainingInfo.value.targetDateStr)})`
       });
 
+      // 2. Tomorrow's Motivation Insight
+      if (tomorrowAllowanceInfo.value && !tomorrowAllowanceInfo.value.isLastDay && tomorrowAllowanceInfo.value.isIncrease) {
+        insights.push({
+          type: 'success',
+          message: `🔥 พลังแห่งการประหยัด: หากวันนี้คุณไม่ใช้จ่ายเพิ่ม พรุ่งนี้คุณจะมีงบกินใช้เพิ่มขึ้นเป็น ฿${formatNumber(tomorrowAllowanceInfo.value.amount)} ต่อวัน (+฿${formatNumber(tomorrowAllowanceInfo.value.diff)})!`
+        });
+      }
+
       // 2. Savings percentage
       const savingsPocket = budgetProgressList.value.find(p => p.category === 'เงินออม');
       const savingsAmt = savingsPocket ? savingsPocket.budget : 0;
@@ -1631,6 +1688,7 @@ export default {
       spentToday,
       dailyAllowanceTarget,
       remainingTodayAllowance,
+      tomorrowAllowanceInfo,
       smartInsights,
       isHistoryModalOpen,
       selectedEnvelopeForHistory,
