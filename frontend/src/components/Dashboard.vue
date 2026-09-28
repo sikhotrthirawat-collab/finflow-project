@@ -326,20 +326,67 @@
       </div>
     </div>
 
-    <!-- Daily Spending Trend Chart (สถิติการใช้จ่ายรายวัน - Pure HTML/CSS Version) -->
+    <!-- Daily Cashflow Trend Chart (สถิติรายรับ - รายจ่ายรายวันของเดือนนี้) -->
     <div class="glass-card" style="border-radius: 24px; padding: 1.5rem; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--shadow-md); margin-top: 2rem; margin-bottom: 2rem;">
-      <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
-        <span style="display: flex; align-items: center; gap: 6px;">
-          <span>📈</span> สถิติการใช้จ่ายรายวันของเดือนนี้ (Daily Spending Chart)
-        </span>
-        <span style="font-size: 0.75rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 20px;">
-          หน่วย: บาท (฿)
-        </span>
-      </h4>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
+        <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0; display: flex; align-items: center; gap: 6px;">
+          <span>📈</span> สถิติรายรับ - รายจ่ายรายวันของเดือนนี้ (Daily Cashflow Chart)
+        </h4>
 
-      <div v-if="hasNoExpensesThisMonth" style="height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+        <!-- Controls: Legends & Filter Toggle -->
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <!-- Legend Items -->
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 0.75rem; color: var(--text-secondary);">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="width: 10px; height: 10px; border-radius: 2px; background: #10b981; display: inline-block;"></span>
+              <span>รายรับ (Income)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="width: 10px; height: 10px; border-radius: 2px; background: #3b82f6; display: inline-block;"></span>
+              <span>รายจ่ายกินใช้</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="width: 12px; height: 2px; border-top: 2px dashed #10b981; display: inline-block;"></span>
+              <span>เป้าแนะนำ</span>
+            </div>
+          </div>
+
+          <!-- Filter Pills -->
+          <div style="display: flex; background: rgba(0,0,0,0.04); padding: 3px; border-radius: 10px; border: 1px solid var(--border-color);">
+            <button 
+              type="button" 
+              @click="dailyChartFilter = 'all'" 
+              class="btn btn-sm" 
+              :style="dailyChartFilter === 'all' ? { background: 'var(--color-primary)', color: '#fff', fontWeight: '700' } : { background: 'transparent', color: 'var(--text-muted)' }"
+              style="padding: 3px 8px; font-size: 0.7rem; border-radius: 8px; border: none; cursor: pointer;"
+            >
+              ทั้งหมด
+            </button>
+            <button 
+              type="button" 
+              @click="dailyChartFilter = 'income'" 
+              class="btn btn-sm" 
+              :style="dailyChartFilter === 'income' ? { background: '#10b981', color: '#fff', fontWeight: '700' } : { background: 'transparent', color: 'var(--text-muted)' }"
+              style="padding: 3px 8px; font-size: 0.7rem; border-radius: 8px; border: none; cursor: pointer;"
+            >
+              เฉพาะรายรับ
+            </button>
+            <button 
+              type="button" 
+              @click="dailyChartFilter = 'expense'" 
+              class="btn btn-sm" 
+              :style="dailyChartFilter === 'expense' ? { background: '#ef4444', color: '#fff', fontWeight: '700' } : { background: 'transparent', color: 'var(--text-muted)' }"
+              style="padding: 3px 8px; font-size: 0.7rem; border-radius: 8px; border: none; cursor: pointer;"
+            >
+              เฉพาะรายจ่าย
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="hasNoChartDataThisMonth" style="height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
         <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">📊</span>
-        ไม่มีข้อมูลรายจ่ายการกินใช้ในเดือนนี้เพื่อวาดกราฟ
+        ไม่มีข้อมูลรายรับหรือรายจ่ายกินใช้ในเดือนนี้เพื่อวาดกราฟ
       </div>
 
       <div v-else style="display: flex; height: 260px; margin-top: 1rem; position: relative;">
@@ -360,8 +407,9 @@
             <div style="height: 25%; border-bottom: 1px solid rgba(255,255,255,0.1);"></div>
           </div>
 
-          <!-- Allowance Limit Guideline (เส้นงบรายวันแนะนำ) -->
+          <!-- Allowance Limit Guideline (เส้นงบรายวันแนะนำ - เฉพาะเมื่อเปิดโหมดรายจ่ายหรือทั้งหมด) -->
           <div 
+            v-if="dailyChartFilter !== 'income'"
             :style="{ bottom: allowanceLineHeightPercent + '%' }"
             style="position: absolute; left: 0; width: 100%; border-top: 2px dashed #10b981; z-index: 2; pointer-events: none; transition: bottom 0.3s ease;"
           >
@@ -370,26 +418,48 @@
             </span>
           </div>
 
-          <!-- Vertical Bars -->
+          <!-- Vertical Bars for each Day -->
           <div 
             v-for="bar in dailyChartData" 
             :key="bar.day" 
             style="flex: 1; margin: 0 1px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; z-index: 3;"
           >
-            <!-- Bar Shape -->
-            <div 
-              :style="{ 
-                height: bar.heightPercent + '%', 
-                backgroundColor: bar.color,
-                border: '1px solid ' + bar.borderColor,
-                boxShadow: bar.isOver ? '0 0 8px rgba(239, 68, 68, 0.25)' : 'none'
-              }" 
-              style="width: 100%; border-radius: 4px 4px 0 0; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; position: relative;"
-              class="daily-bar"
-            >
+            <!-- Bars Container (Can contain Income Bar and Expense Bar) -->
+            <div class="daily-bar" style="width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 1px; cursor: pointer; position: relative;">
+              
+              <!-- Income Bar (Green) -->
+              <div 
+                v-if="dailyChartFilter === 'all' || dailyChartFilter === 'income'"
+                :style="{ 
+                  height: bar.incomeHeightPercent + '%', 
+                  backgroundColor: bar.incomeColor,
+                  border: '1px solid ' + bar.incomeBorderColor,
+                  width: dailyChartFilter === 'all' && (bar.income > 0 || bar.expense > 0) ? '48%' : '100%',
+                  opacity: bar.income > 0 ? 1 : 0
+                }"
+                style="border-radius: 3px 3px 0 0; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 0;"
+              ></div>
+
+              <!-- Expense Bar (Blue / Red) -->
+              <div 
+                v-if="dailyChartFilter === 'all' || dailyChartFilter === 'expense'"
+                :style="{ 
+                  height: bar.expenseHeightPercent + '%', 
+                  backgroundColor: bar.expenseColor,
+                  border: '1px solid ' + bar.expenseBorderColor,
+                  boxShadow: bar.isOver ? '0 0 8px rgba(239, 68, 68, 0.3)' : 'none',
+                  width: dailyChartFilter === 'all' && (bar.income > 0 || bar.expense > 0) ? '48%' : '100%',
+                  opacity: bar.expense > 0 ? 1 : 0
+                }"
+                style="border-radius: 3px 3px 0 0; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 0;"
+              ></div>
+
               <!-- Tooltip on Hover (CSS based) -->
-              <div class="daily-bar-tooltip" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px); background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s, transform 0.2s; box-shadow: var(--shadow-md); z-index: 10;">
-                วันที่ {{ bar.day }}: ฿{{ formatNumber(bar.amount) }}
+              <div class="daily-bar-tooltip" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px); background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 0.7rem; font-weight: 700; padding: 6px 10px; border-radius: 8px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s, transform 0.2s; box-shadow: var(--shadow-md); z-index: 10; display: flex; flex-direction: column; gap: 2px;">
+                <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; color: var(--color-primary);">วันที่ {{ bar.day }}</div>
+                <div v-if="bar.income > 0" style="color: #34c759;">💰 รายรับ: +฿{{ formatNumber(bar.income) }}</div>
+                <div v-if="bar.expense > 0" :style="{ color: bar.isOver ? '#ef4444' : '#38bdf8' }">💸 รายจ่าย: -฿{{ formatNumber(bar.expense) }}</div>
+                <div v-if="bar.income === 0 && bar.expense === 0" style="color: var(--text-muted);">ไม่มีรายการในวันนี้</div>
               </div>
             </div>
 
@@ -1585,47 +1655,80 @@ export default {
       // Direct redirect logic
     };
 
-    // Daily Spending Chart computed properties
+    const dailyChartFilter = ref('all'); // 'all' | 'expense' | 'income'
+
+    // Daily Spending & Income Chart computed properties
     const dailyChartMaxVal = computed(() => {
       const totalDays = daysRemainingInfo.value.totalDays || 30;
-      const dailyTotals = Array(totalDays).fill(0);
-      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
-      dailyExpenses.forEach(tx => {
+      const dailyExpenses = Array(totalDays).fill(0);
+      const dailyIncomes = Array(totalDays).fill(0);
+
+      allTransactions.value.forEach(tx => {
         const txDate = new Date(tx.date);
         const day = txDate.getDate();
         if (day >= 1 && day <= totalDays) {
-          dailyTotals[day - 1] += parseFloat(tx.amount);
+          if (tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด')) {
+            dailyExpenses[day - 1] += parseFloat(tx.amount || 0);
+          } else if (tx.type === 'income') {
+            dailyIncomes[day - 1] += parseFloat(tx.amount || 0);
+          }
         }
       });
-      return Math.max(500, dailyAllowanceTarget.value * 1.3, ...dailyTotals);
+
+      let valuesToCheck = [];
+      if (dailyChartFilter.value === 'all') {
+        valuesToCheck = [...dailyExpenses, ...dailyIncomes];
+      } else if (dailyChartFilter.value === 'expense') {
+        valuesToCheck = [...dailyExpenses];
+      } else if (dailyChartFilter.value === 'income') {
+        valuesToCheck = [...dailyIncomes];
+      }
+
+      return Math.max(500, dailyAllowanceTarget.value * 1.3, ...valuesToCheck);
     });
 
     const dailyChartData = computed(() => {
       const totalDays = daysRemainingInfo.value.totalDays || 30;
-      const dailyTotals = Array(totalDays).fill(0);
-      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
-      dailyExpenses.forEach(tx => {
+      const dailyExpenses = Array(totalDays).fill(0);
+      const dailyIncomes = Array(totalDays).fill(0);
+
+      allTransactions.value.forEach(tx => {
         const txDate = new Date(tx.date);
         const day = txDate.getDate();
         if (day >= 1 && day <= totalDays) {
-          dailyTotals[day - 1] += parseFloat(tx.amount);
+          if (tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด')) {
+            dailyExpenses[day - 1] += parseFloat(tx.amount || 0);
+          } else if (tx.type === 'income') {
+            dailyIncomes[day - 1] += parseFloat(tx.amount || 0);
+          }
         }
       });
 
       const maxVal = dailyChartMaxVal.value;
       const allowanceTarget = dailyAllowanceTarget.value;
 
-      return dailyTotals.map((amount, idx) => {
+      return Array.from({ length: totalDays }, (_, idx) => {
         const dayNum = idx + 1;
-        const heightPercent = maxVal > 0 ? (amount / maxVal) * 100 : 0;
-        const isOver = amount > allowanceTarget;
+        const expAmount = dailyExpenses[idx];
+        const incAmount = dailyIncomes[idx];
+
+        const expHeightPercent = maxVal > 0 ? (expAmount / maxVal) * 100 : 0;
+        const incHeightPercent = maxVal > 0 ? (incAmount / maxVal) * 100 : 0;
+
+        const isOver = expAmount > allowanceTarget;
+
         return {
           day: dayNum,
-          amount: amount,
-          heightPercent: Math.min(100, heightPercent),
+          expense: expAmount,
+          income: incAmount,
+          expenseHeightPercent: Math.min(100, expHeightPercent),
+          incomeHeightPercent: Math.min(100, incHeightPercent),
           isOver: isOver,
-          color: isOver ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.6)',
-          borderColor: isOver ? '#ef4444' : '#3b82f6'
+          hasData: expAmount > 0 || incAmount > 0,
+          expenseColor: isOver ? 'rgba(239, 68, 68, 0.75)' : 'rgba(59, 130, 246, 0.7)',
+          expenseBorderColor: isOver ? '#ef4444' : '#3b82f6',
+          incomeColor: 'rgba(16, 185, 129, 0.8)',
+          incomeBorderColor: '#10b981'
         };
       });
     });
@@ -1640,9 +1743,10 @@ export default {
       return max > 0 ? (dailyAllowanceTarget.value / max) * 100 : 0;
     });
 
-    const hasNoExpensesThisMonth = computed(() => {
-      const dailyExpenses = allTransactions.value.filter(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
-      return dailyExpenses.length === 0;
+    const hasNoChartDataThisMonth = computed(() => {
+      const hasIncome = allTransactions.value.some(tx => tx.type === 'income');
+      const hasExpense = allTransactions.value.some(tx => tx.type === 'expense' && (tx.category === 'เหลือใช้' || tx.category === 'เงินสด'));
+      return !hasIncome && !hasExpense;
     });
 
     // Watchers
@@ -1680,9 +1784,10 @@ export default {
       incomeCategories,
       dailyForm,
       dailyChartData,
+      dailyChartFilter,
       yAxisTicks,
       allowanceLineHeightPercent,
-      hasNoExpensesThisMonth,
+      hasNoChartDataThisMonth,
       daysRemainingInfo,
       freeSpendPocket,
       spentToday,
